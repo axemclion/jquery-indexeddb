@@ -1,0 +1,87 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Cambria, Times;
+}
+
+.sample {
+    display: none;
+}
+
+.examples {
+    margin: 0;
+    padding: 0;
+}
+
+.example-item {
+    list-style: none;
+    background-color: #FFFFFF;
+    padding: 0.1em;
+    margin: 0;
+    cursor: pointer;
+}
+
+.example-item .snippet {
+    height: 0;
+    opacity: 0;
+    display: block;
+    overflow: hidden;
+    width: 98%;
+    border: 0;
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+}
+
+.example-item .snippet .code {
+    font-family: Monaco, Consolas, courier;
+    font-size: 0.9em;
+    background-color: #2A211C;
+    color: #BDAE9D;
+    width: 100%;
+    padding: 0.3em 0;
+}
+
+.floating-button {
+    position: absolute;
+    left: 94%;
+    margin: 0.5em 0.5em 0 0;
+}
+
+.example-title {
+    text-decoration: none;
+    color: black;
+    padding: 0.1em;
+    display: block;
+}
+
+.example-item:hover {
+    background-color: #FFFFCC;
+}
+
+.example-item:target .example-name {
+    background-color: #DFECFF;
+}
+
+.example-item:target .code-linq, .example-item:target .code-full {
+    height: auto;
+    opacity: 1;
+    padding: 0.3em 1em;
+    margin: 0.1em 0.5em;
+}
+
+.example-more-code {
+    display: none;
+    font-size: 0.8em;
+    padding: 0.1em 0.5em;
+    color: navy;
+    float: right;
+}
+
+.example-more-code:hover {
+    text-decoration: underline;
+}
+
+.example-item:target .example-more-code {
+    display: inline;
+}

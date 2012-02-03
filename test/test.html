@@ -1,0 +1,125 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <script type = "text/javascript" src="jquery.min.js">
+        </script>
+        <script type = "text/javascript" src="jquery.indexeddb.js">
+        </script>
+        <script type = "text/javascript" src="jquery.indexeddb.test.js">
+        </script>
+        <script type = "text/javascript">
+            var testSuite = (function(){
+            	var DB = {
+            		NAME: "SampleDB",
+            		OBJECT_STORE_1: "ObjectStore1",
+            		INDEX_1_ON_OBJECT_STORE_1: "Index1-ObjectStore1",
+            		INDEX_2_ON_OBJECT_STORE_1: "Index2-ObjectStore1",
+            		OBJECT_STORE_2: "ObjectStore2",
+            		INDEX_1_ON_OBJECT_STORE_2: "Index1-ObjectStore2",
+            		INDEX_2_ON_OBJECT_STORE_2: "Index2-ObjectStore2",
+            		OBJECT_STORE_3: "ObjectStore3",
+            		OBJECT_STORE_4: "ObjectStore4",
+            	}
+            	return {
+            		/**
+            		 * A database can be opened.
+            		 * The success promise has the raw DB object which is also the result of the operation
+            		 * The error promise has the raw error, and the request object, just in case
+            		 */
+            		"$.indexedDB(DBNAME)": function(){
+            			$.indexedDB(DB.NAME).then(function(dbOpenRequestResult){
+            				// called when the request is successful
+            				console.log("Success opening database", dbOpenRequestResult);
+            				
+            				dbOpenRequestResult.onabort = function(){
+            					console.log("DB Aborted");
+            				};
+            				
+            				dbOpenRequestResult.onversionchange = function(oldVersion, newVersion){
+            					console.log("Version change event, changed versions from ", oldVersion, newVersion);
+            				};
+            				
+            				dbOpenRequestResult.onerror = function(e){
+            					console.log("Error with db", e);
+            				};
+            				
+            			}, function(error, dbOpenRequest){
+            				// called when the request is blocked, has an error or upgrade is needed 
+            				console.log("Error opening database", error, dbOpenRequest);
+            			});
+            		},
+            		/**
+            		 * A database can be deleted with its name.
+            		 * The success promise has the result of the operation.
+            		 * THe error promise has the error that occured
+            		 */
+            		"$.indexedDB(DBNAME).deleteDatabase()": function(){
+            			$.indexedDB(DB.NAME).deleteDatabase().then(function(result){
+            				console.log("Result of delete DB request", result);
+            			}, function(error){
+            				// called when the request is blocked, has an error or upgrade is needed 
+            				console.log("Error of delete DB request", error)
+            			});
+            		},
+            		
+            		/**
+            		 * A database schema can be specified. If a schema is specified, the database
+            		 */
+            		"$.indexedDB(DBNAME).schema(SCHEMA)": function(){
+            			$.indexedDB(DB.NAME).schema({
+            				"1": function(versionTransaction){
+            					var objectStore1 = versionTransaction.createObjectStore(DB.OBJECT_STORE_1);
+            					objectStore1.createIndex(DB.INDEX1_ON_OBJECT_STORE_1)
+            					var objectStore3 = versionTransaction.createObjectStore(DB.OBJECT_STORE_3);
+            				},
+            				"2": function(versionTransaction){
+            					var objectStore2 = versionTransaction.createObjectStore(DB.OBJECT_STORE_2);
+            					versionTransaction.deleteObjectStore(DB.OBJECT_STORE_3);
+            				},
+            				"3": function(versionTransaction){
+            					var objectStore2 = versionTransaction.objectStore(DB.OBJECT_STORE_2);
+            					var index1OnObjectStore2 = objectStore2.createIndex(DB.INDEX_1_ON_OBJECT_STORE_2);
+            				}
+            			});
+            		},
+            		"$.indexedDB(DBNAME).objectStore(STORE_NAME)": function(){
+						$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(data());
+            		},
+            		"$.indexedDB(DBNAME).transaction(mode || READ_ONLY, callBack(transaction))": function(){
+            			$.indexedDB(DB.NAME).transaction(mode, function(transaction){
+            				transaction.objectStore(DB.OBJECT_STORE_1).add(data());
+            				transaction.objectStore(DB.OBJECT_STORE_1);
+            				
+            			}).then(function(transaction){
+            				console.log("Transaction Object Created");
+            				transaction.oncomplete = function(){
+            					console.log("Transaction completed");
+            				};
+            				transaction.onabort = function(){
+            					console.log("Transaction aborted");
+            				};
+            				transaction.onerror = function(){
+            					console.log("Transaction Error occured");
+            				}
+            			}, function(error){
+            				console.log("Creating Transaction failed");
+            			});
+            		}
+            	};
+            })();
+        </script>
+        <script>
+            (function(suite, ul, preview){
+            	for (test in suite) {
+            		$("<li>").append($("<a>").data("code", test).html(test)).appendTo(ul);
+            	}
+            	$("a").live("click", function(){
+            		suite[$(this).data("code")]();
+            	}).live("mouseenter", function(){
+            		preview.html(suite[$(this).data("code")].toString());
+            	});
+            })(testSuite, $("<ul>").appendTo("body"), $("<pre>").appendTo("body"));
+        </script>
+    </body>
+</html>
