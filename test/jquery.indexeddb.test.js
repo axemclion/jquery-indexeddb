@@ -13,7 +13,7 @@ window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
 var jqueryIndexedDB_Test = {
     "Set Version": {
         "code": function(){
-            $.indexeddb("BookShop1").setVersion(10).then(console.info, console.error);
+            $.indexedDB("BookShop1").setVersion(10).then(console.info, console.error);
         },
         "alternate": function(){
             var request = window.indexedDB.open("BookShop1");
@@ -32,7 +32,7 @@ var jqueryIndexedDB_Test = {
     
     "Transaction": {
         "code": function(){
-            var transaction = $.indexeddb("BookShop1").transaction([], IDBTransaction.READ_WRITE);
+            var transaction = $.indexedDB("BookShop1").transaction([], IDBTransaction.READ_WRITE);
             transaction.then(console.info, console.error);
             transaction.objectStore("BookList").add(data()).then(console.info, console.error);
             transaction.objectStore("OldBookList").add(data(), new Date().getTime()).then(console.info, console.error);
@@ -68,7 +68,7 @@ var jqueryIndexedDB_Test = {
     
     "Create Object Store": {
         "code": function(){
-            $.indexeddb("BookShop1").createObjectStore("BookList", {
+            $.indexedDB("BookShop1").createObjectStore("BookList", {
                 "keyPath": "id",
                 "autoIncrement": true
             }).then(console.info, console.error);
@@ -98,7 +98,7 @@ var jqueryIndexedDB_Test = {
     
     "Delete Object Store": {
         "code": function(){
-            $.indexeddb("BookShop1").deleteObjectStore("BookList", false).then(console.info, console.error);
+            $.indexedDB("BookShop1").deleteObjectStore("BookList", false).then(console.info, console.error);
         },
         "alternate": function(){
             var request = window.indexedDB.open("BookShop1");
@@ -122,7 +122,7 @@ var jqueryIndexedDB_Test = {
     
     "Open Object Store, but dont create if does not exist": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList", false).then(console.info, console.error);
+            $.indexedDB("BookShop1").objectStore("BookList", false).then(console.info, console.error);
         },
         "alternate": function(){
             var request = window.indexedDB.open("BookShop1");
@@ -145,7 +145,7 @@ var jqueryIndexedDB_Test = {
     
     "Open Object Store, or create if does not exist": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList", {
+            $.indexedDB("BookShop1").objectStore("BookList", {
                 "keyPath": "id",
                 "autoIncrement": true
             }).then(console.info, console.error);
@@ -183,7 +183,7 @@ var jqueryIndexedDB_Test = {
     "Add Data to Object Store": {
         "code": function(){
             window.book = data();
-            $.indexeddb("BookShop1").objectStore("BookList").add(book).then(function(val){
+            $.indexedDB("BookShop1").objectStore("BookList").add(book).then(function(val){
                 book.id = val;
                 console.info(val);
             }, console.error);
@@ -212,7 +212,7 @@ var jqueryIndexedDB_Test = {
     
     "Get data": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList").get(book.id).then(console.info, console.error);
+            $.indexedDB("BookShop1").objectStore("BookList").get(book.id).then(console.info, console.error);
         },
         "alternate": function(){
             var request = window.indexedDB.open("BookShop1");
@@ -237,7 +237,7 @@ var jqueryIndexedDB_Test = {
     "Modify Data in Object Store": {
         "code": function(){
             book["modified" + Math.random()] = true;
-            $.indexeddb("BookShop1").objectStore("BookList").update(book, new Date().getTime()).then(console.info, console.error);
+            $.indexedDB("BookShop1").objectStore("BookList").update(book, new Date().getTime()).then(console.info, console.error);
         },
         "alternate": function(){
             book["modified" + Math.random()] = true;
@@ -262,7 +262,7 @@ var jqueryIndexedDB_Test = {
     
     "Cursor and list all items in the object store": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList").openCursor().each(console.info);
+            $.indexedDB("BookShop1").objectStore("BookList").openCursor().each(console.info);
         },
         "alternate": function(){
             var request = window.indexedDB.open("BookShop1");
@@ -290,7 +290,7 @@ var jqueryIndexedDB_Test = {
     
     "Cursor and delete items with price that is an odd number": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList").openCursor().deleteEach(function(value, key){
+            $.indexedDB("BookShop1").objectStore("BookList").openCursor().deleteEach(function(value, key){
                 if (value && value.price % 2) {
                     console.info("Deleting", value);
                     return true;
@@ -326,7 +326,7 @@ var jqueryIndexedDB_Test = {
     
     "Cursor and update items with price that is an odd number": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList").openCursor().updateEach(function(value){
+            $.indexedDB("BookShop1").objectStore("BookList").openCursor().updateEach(function(value){
                 if (value && value.price % 2) {
                     value["modified-" + Math.random()] = true;
                     console.info("Updating", value);
@@ -363,7 +363,7 @@ var jqueryIndexedDB_Test = {
     },
     "Open an Index and iterate over its objects": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList").index("price").openCursor().each(console.info);
+            $.indexedDB("BookShop1").objectStore("BookList").index("price").openCursor().each(console.info);
         },
         "alternate": function(){
             var request = window.indexedDB.open("BookShop1");
@@ -393,7 +393,7 @@ var jqueryIndexedDB_Test = {
     
     "Open a key cursor on an Index and iterate over its objects": {
         "code": function(){
-            $.indexeddb("BookShop1").objectStore("BookList").index("price").openKeyCursor([200, 500]).each(console.info);
+            $.indexedDB("BookShop1").objectStore("BookList").index("price").openKeyCursor([200, 500]).each(console.info);
         },
         "alternate": function(){
             var request = window.indexedDB.open("BookShop1");
