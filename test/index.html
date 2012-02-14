@@ -1,0 +1,171 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
+        <script src="../lib/jquery.min.js" type="text/javascript">
+        </script>
+        <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js">
+        </script>
+        <script type="text/javascript" src="../jquery.indexeddb.js">
+        </script>
+        <script>
+            
+            var DB = {
+            	NAME: "dbName",
+            	OBJECT_STORE_1: "objectStore1",
+            	OBJECT_STORE_2: "objectStore2",
+            	OBJECT_STORE_3: "objectStore3",
+            	INDEX1_ON_OBJECT_STORE_1: "Index1_ObjectStore1",
+            	INDEX1_ON_OBJECT_STORE_2: "Index1_ObjectStore2"
+            };
+            
+            function log(){
+            	ok(true, JSON.stringify(arguments));
+            	console.log.apply(console, arguments);
+            }
+            
+            function sample(){
+            	return {
+            		"id": Math.random(),
+            		"String": "Sample String",
+            		"Int": parseInt(Math.random() * 100),
+            		"Float": Math.random(),
+            		"Boolean": true
+            	}
+            }
+            
+            $(document).ready(function(){
+            	module("Database");
+            	test("Delete database", function(){
+            		stop();
+            		$.indexedDB(DB.NAME).deleteDatabase().then(function(){
+            			ok(true, "Database deleted");
+            			start();
+            		}, function(err, e){
+            			ok(false, "Could not delete database " + e.type);
+            			start();
+            		}, function(res, e){
+            			ok(false, "Database delete blocked " + e.type);
+            			start();
+            		});
+            	});
+            	asyncTest("Open or create a database", function(){
+            		stop();
+            		$.indexedDB(DB.NAME).then(function(db, e){
+            			ok(true, "Database created");
+            			equal(db.version, 1, "Database Version without schema " + db.version);
+            			start();
+            		}, function(err, e){
+            			ok(false, "Could not create database", e);
+            			start();
+            		}, function(db, e){
+            			equal(e.type, "upgradeneeded", "In progress");
+            			start();
+            		});
+            	});
+            	
+            	
+            	module("Database - version change");
+            	stop();
+            	asyncTest("Open a database with schema", function(){
+            		stop();
+            		$.indexedDB(DB.NAME, {
+            			schema: {
+            				"1": function(versionTransaction){
+            					var objectStore1 = versionTransaction.createObjectStore(DB.OBJECT_STORE_1);
+            					//objectStore1.createIndex(DB.INDEX1_ON_OBJECT_STORE_1)
+            					var objectStore3 = versionTransaction.createObjectStore(DB.OBJECT_STORE_3);
+            					ok(true, "Version 1 upgrade completed");
+            				},
+            				"2": function(versionTransaction){
+            					var objectStore2 = versionTransaction.createObjectStore(DB.OBJECT_STORE_2);
+            					versionTransaction.deleteObjectStore(DB.OBJECT_STORE_3);
+            					ok(true, "Version 2 upgrade completed");
+            					
+            				},
+            				"3": function(versionTransaction){
+            					var objectStore2 = versionTransaction.objectStore(DB.OBJECT_STORE_2);
+            					//var index1OnObjectStore2 = objectStore2.createIndex(DB.INDEX_1_ON_OBJECT_STORE_2);
+            					ok(true, "Version 3 upgrade completed");
+            				}
+            			}
+            		}).then(function(db, e){
+            			ok(true, "Database opened");
+            			equal(db.version, 3, "Database version with schema");
+            			equal(db.objectStoreNames.length, 2, "Length of objectStoreNames");
+            			log(db.objectStoreNames);
+            			start();
+            		}, function(err, e){
+            			ok(false, "Database open failed");
+            			start();
+            		}, function(db, e){
+            			equal(e.type, "upgradeneeded", "In Progress");
+            			start();
+            		});
+            	});
+            	
+            	asyncTest("DB with wrong version", function(){
+            		stop();
+            		$.indexedDB(DB.name, {
+            			"version": 4
+            		}).then(function(db){
+            			ok(true, "Database opened with " + db.version);
+            			start();
+            		}, function(err, e){
+            			ok(false, "Transaction failed coz this was opened with wrong version" + e.type);
+            			start();
+            		}, function(db){
+            			ok(true, "Database in progress with " + db.version);
+            			start();
+            		});
+            	});
+            	
+            	
+            	module("Transactions");
+            	asyncTest("Create a simple transaction and run some ops inside it", function(){
+            		stop();
+            		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2], 1).progress(function(transaction){
+            			var data = sample();
+            			transaction.objectStore(DB.OBJECT_STORE_1).add(data, new Date().getTime());
+            			transaction.objectStore(DB.OBJECT_STORE_2).add(data);
+            			ok(true, "Data added to database")
+            			start();
+            		}).fail(function(err, e){
+            			ok(false, "Transaction Creation failed due to " + err);
+            		});
+            	});
+            	
+            	asyncTest("Create a simple transaction and abort it", function(){
+            		stop();
+            		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2], 1).progress(function(transaction){
+            			var data = sample();
+            			transaction.objectStore(DB.OBJECT_STORE_1).add(data, new Date().getTime());
+            			transaction.abort();
+            			transaction.objectStore(DB.OBJECT_STORE_2).add(data).then(function(){
+            				ok(false, "Transaction was aborted but data was still added");
+            				start();
+            			}, function(){
+            				ok(true, "Transaction was aborted and data not added");
+            				start();
+            			});
+            			start();
+            		}).fail(function(err, e){
+            			ok(true, "Transaction Creation failed due to " + err);
+            			start();
+            		});
+            	});
+            });
+        </script>
+    </head>
+    <body>
+        <h1 id="qunit-header">Jquery IndexedDB Tests</h1>
+        <h2 id="qunit-banner"></h2>
+        <div id="qunit-testrunner-toolbar">
+        </div>
+        <h2 id="qunit-userAgent"></h2>
+        <ol id="qunit-tests">
+        </ol>
+        <div id="qunit-fixture">
+            test markup, will be hidden
+        </div>
+    </body>
+</html>

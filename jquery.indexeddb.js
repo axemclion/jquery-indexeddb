@@ -1,439 +1,339 @@
-(function($){
-    $.extend({
-        /**
-* The edDB object used to open databases
-* @param {Object} dbName
-* @param {Object} config
-*/
-        "indexedDB": function(dbName, config){
-            indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
-            IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
-            IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-            
-            var promise = {
-                /**
-* Returns a database promise
-*/
-                db: function(dbName){
-                    return $.Deferred(function(dfd){
-                        //console.debug("Starting DB Promise", arguments);
-                        var req = indexedDB.open(dbName);
-                        req.onsuccess = function(){
-                            //console.debug("DB Promise resolved", req.result);
-                            dfd.resolve(req.result);
-                        }
-                        req.onerror = function(e){
-                            //console.debug("DB Promise rejected", req.result);
-                            dfd.reject(e, req);
-                            return;
-                        }
-                    }).promise();
-                },
-                
-                /**
-* Returns a promise for version change transaction.
-* @param {Object} dbPromise
-* @param {Object} version - optional. If nothing is specified, version is increased by 1.
-*/
-                versionTransaction: function(dbPromise, version){
-                    return $.Deferred(function(dfd){
-                        dbPromise.then(function(db){
-                            //console.debug("Version Change Transaction Promise started", db, version);
-                            var req = db.setVersion(version || (isNaN(parseInt(db.version, 10)) ? 0 : parseInt(db.version, 10) + 1));
-                            req.onsuccess = function(){
-                                //console.debug("Version Change Transaction Promise completed", req.result);
-                                req.result.oncomplete = function(){
-                                    //console.debug("Transaction Complete, so closing database");
-                                    req.result.db.close();
-                                }
-                                dfd.resolve(req.result);
-                            }
-                            req.onblocked = function(e){
-                                //console.debug("Version Change Transaction Promise blocked", e);
-                                dfd.reject(e, req);
-                                return;
-                            }
-                            req.onerror = function(e){
-                                //console.debug("Version Change Transaction Promise error", e);
-                                dfd.reject(e, req);
-                                return;
-                            }
-                        }, dfd.reject);
-                    }).promise();
-                },
-                
-                /**
-* Returns a new transaction.
-* @param {Object} dbPromise
-* @param {Object} objectStoreNames
-* @param {Object} transactionType
-*/
-                transaction: function(dbPromise, objectStoreNames, transactionType){
-                    return $.Deferred(function(dfd){
-                        (typeof objectStoreNames === "string") && (objectStoreNames = [objectStoreNames]);
-                        dbPromise.then(function(db){
-                            //console.debug("Transaction Promise started", db, objectStoreNames, transactionType);
-                            try {
-                                var transaction = db.transaction(objectStoreNames || [], transactionType || IDBTransaction.READ);
-                                transaction.oncomplete = function(){
-                                    //console.debug("Transaction completed, so closing database");
-                                    transaction.db.close();
-                                }
-                                //console.debug("Transaction Promise completed", transaction);
-                            }
-                            catch (e) {
-                                //console.debug("Error in transaction", e);
-                                dfd.reject(e, db);
-                                return;
-                            }
-                            dfd.resolve(transaction);
-                        }, dfd.reject);
-                    }).promise();
-                },
-                /**
-* Returns an object store if available. If object store is not available, tries to create it.
-* @param {Object} transactionPromise
-* @param {Object} objectStoreName
-* @param {Object} createOptions - if false, objectStore is not created. Undefined or Null creates out-of-line keys. An object with {autoincrement , keypPath} is passed directly to the create call
-*/
-                objectStore: function(transactionPromise, objectStoreName, createOptions){
-                    return $.Deferred(function(dfd){
-                        transactionPromise.then(function(transaction){
-                            //console.debug("ObjectStore Promise started", transactionPromise, objectStoreName, createOptions);
-                            try {
-                                var objectStore = transaction.objectStore(objectStoreName);
-                            //console.debug("ObjectStore Promise completed", objectStore);
-                            }
-                            catch (e) {
-                                //console.debug("Object store not found", objectStoreName, e);
-                                try {
-                                    if (createOptions === false) {
-                                        //console.debug("Could not create object", e);
-                                        dfd.reject(e, transaction.db);
-                                        return;
-                                    }
-                                    else {
-                                        //console.debug("Create options specified, so trying to create the database", createOptions);
-                                        objectStore = transaction.db.createObjectStore(objectStoreName, createOptions);
-                                    //console.debug("Object Store created", objectStore);
-                                    
-                                    }
-                                }
-                                catch (e) {
-                                    //console.debug("Error in Object Store Promise", e);
-                                    dfd.reject(e, transaction.db);
-                                    return;
-                                }
-                            }
-                            dfd.resolve(objectStore);
-                        }, dfd.reject);
-                    }).promise();
-                },
-                /**
-* Returns a promise to remove an object store
-* @param {Object} objectStoreName
-*/
-                deleteObjectStore: function(transactionPromise, objectStoreName){
-                    return $.Deferred(function(dfd){
-                        transactionPromise.then(function(transaction){
-                            try {
-                                transaction.db.deleteObjectStore(objectStoreName);
-                                //console.debug("Deleted object store", objectStoreName);
-                                dfd.resolve(transaction.db);
-                            }
-                            catch (e) {
-                                //console.debug("Could not delete ", objectStoreName)
-                                dfd.reject(e, transaction.db);
-                                return;
-                            }
-                        }, dfd.reject);
-                    }).promise();
-                },
-                /**
-* Creates a cursor Promise
-* @param {Object} sourcePromise - Object Store or Index
-* @param {Object} range
-* @param {Object} direction
-*/
-                cursor: function(sourcePromise, range, direction, cursorType){
-                    if (!cursorType) {
-                        cursorType = "openCursor";
-                    }
-                    return $.Deferred(function(dfd){
-                        sourcePromise.then(function(source){
-                            //console.debug("Cursor Promise Started", source);
-                            var req = source[cursorType](range, direction);
-                            req.onsuccess = function(){
-                                //console.debug("Cursor Promise completed", req);
-                                dfd.resolve(req);
-                            };
-                            req.onerror = function(e){
-                                //console.debug("Cursor Promise error", e, req);
-                                dfd.reject(e, req);
-                                return;
-                            };
-                        }, dfd.reject);
-                    }).promise();
-                },
-                /**
-* Returns an index promise, or creates one if index does not exist
-* @param {Object} indexName
-* @param {Object} objectStorePromise
-* @parasm {Object} transactionPromise is required as getting transaction.db.name is not supported in Chrome
-*/
-                index: function(indexName, objectStorePromise, transactionPromise){
-                    return $.Deferred(function(dfd){
-                        objectStorePromise.then(function(objectStore){
-                            //console.debug("Index Promise started", objectStore)
-                            try {
-                                var index = objectStore.index(indexName + "-index");
-                                //console.debug("Index Promise completed", index);
-                                dfd.resolve(index);
-                            }
-                            catch (e) {
-                                transactionPromise.then(function(transaction){
-                                    var name = transaction.db.name;
-                                    transaction.abort();
-                                    transaction.db.close();
-                                    //console.debug("Index Promise requires version change");
-                                    $.when(promise.versionTransaction(promise.db(name))).then(function(transaction){
-                                        //console.debug("Index Promise version change transaction started", transaction);
-                                        try {
-                                            var index = transaction.objectStore(objectStore.name).createIndex(indexName + "-index", indexName);
-                                            transaction.oncomplete = function(){
-                                                transaction.db.close();
-                                            }
-                                            //console.debug("Index Promise completed", index);
-                                            dfd.resolve(index);
-                                        }
-                                        catch (e) {
-                                            //console.debug("Index Promise Failed", e);
-                                            dfd.reject(e, transaction);
-                                            return;
-                                        }
-                                    }, dfd.reject);
-                                }, dfd.reject);
-                            }
-                        }, dfd.reject);
-                    }).promise();
-                },
-            }//end of promise object
-            /**
-* Returns an objectStore promise with openCursor, etc.
-* @param {Object} objectStoreName
-* @param {Object} canCreate - false: don't create, true|undefined:create with default path, object:create with options
-*/
-            var objectStore = function(transactionPromise, objectStoreName, createOptions){
-                var objectStorePromise = $.Deferred(function(dfd){
-                    if (typeof createOptions === "undefined") {
-                        createOptions = {
-                            "autoIncrement": true
-                        };
-                    }
-                    $.when(promise.objectStore(transactionPromise, objectStoreName, createOptions)).then(function(objectStore){
-                        dfd.resolve(objectStore);
-                    }, function(e, db){
-                        $.when(promise.objectStore(promise.versionTransaction(dbPromise), objectStoreName, createOptions)).then(function(objectStore){
-                            dfd.resolve(objectStore);
-                        }, dfd.reject);
-                    }, dfd.reject);
-                }).promise();
-                
-                var crudOp = function(op, args){
-                    return $.Deferred(function(dfd){
-                        objectStorePromise.then(function(objectStore){
-                            try {
-                                //TODO : Accept all args that are sent
-                                var req = objectStore[op](args[0], args[1]);
-                                req.onsuccess = function(event){
-                                    //console.debug("Performed", op, req.result);
-                                    dfd.resolve(req.result);
-                                };
-                                req.onerror = function(e){
-                                    //console.debug("Error performing", op, e, req);
-                                    dfd.reject(e, req);
-                                    return;
-                                }
-                            }
-                            catch (e) {
-                                //console.debug("Exception in ", op, e, req);
-                                dfd.reject(e, req);
-                                return;
-                            }
-                        }, dfd.reject);
-                    }).promise();
-                };
-                
-                var result = objectStorePromise;
-                $.extend(result, {
-                    "openCursor": function(range, direction){
-                        return cursor(objectStorePromise, range, direction);
-                    },
-                    "index": function(indexName){
-                        /*
-* Transaction promise is required here because when creating a new index, Chrome does not let us get
-* transaction.db from the object Store.
-*/
-                        var indexResult = indexPromise = promise.index(indexName, objectStorePromise, transactionPromise);
-                        return {
-                            "openCursor": function(range, direction){
-                                return cursor(indexPromise, range, direction);
-                            },
-                            "openKeyCursor": function(range, direction){
-                                return cursor(indexPromise, range, direction, "openKeyCursor");
-                            }
-                        };
-                    },
-                    "add": function(data, key){
-                        return crudOp("add", [data, key]);
-                    },
-                    "delete": function(data){
-                        return crudOp("delete", [data]);
-                    },
-                    "remove": function(data){
-                        return crudOp("delete", [data]);
-                    },
-                    "get": function(data){
-                        return crudOp("get", [data]);
-                    },
-                    "update": function(data, key){
-                        return crudOp("put", [data, key]);
-                    },
-                    "put": function(data, key){
-                        return crudOp("put", [data, key]);
-                    }
-                });
-                return result;
-            };
-            /**
-* Defines the bounds of a cursor range
-* @param {Object} range
-*/
-            var bounds = function(range){
-                var result = range;
-                if ($.isArray(range)) {
-                    if (range[0] && range[1])
-                        result = new IDBKeyRange.bound(range[0], range[1], range[2] || true, range[3] || true);
-                    else
-                        if (range[0] && !range[1])
-                            result = new IDBKeyRange.lowerBound(range[0], range[2] || true);
-                        else
-                            if (!range[0] && range[1])
-                                result = new IDBKeyRange.upperBound(range[1], range[3] || true);
-                }
-                return result;
-            };
-            /**
-* Returns a cursor object with each, getAll, etc.
-* @param {Object} sourcePromise
-* @param {Object} range
-* @param {Object} direction
-*/
-            var cursor = function(sourcePromise, range, direction, type){
-                var cursorPromise = promise.cursor(sourcePromise, bounds(range), direction, type);
-                function loop(callback, canDelete){
-                    cursorPromise.then(function(cursorRequest){
-                        function iterator(){
-                            if (cursorRequest.result) {
-                                var result = callback(cursorRequest.result.value, cursorRequest.result.key);
-                                if (canDelete && result) {
-                                    cursorRequest.result["delete"]();
-                                }
-                                else
-                                    if (result) {
-                                        cursorRequest.result.update(result);
-                                    }
-                                cursorRequest.result["continue"]();
-                            }
-                            cursorRequest.onsuccess = iterator;
-                        }
-                        cursorRequest.onsuccess = iterator;
-                        iterator();
-                    }, function(e, req){
-                    //console.debug("Could not open cursor", e, req);
-                    });
-                };
-                var result = cursorPromise;
-                $.extend(result, {
-                    /**
-* Updates each element when iterating on the cursor
-* @param {Object} callback
-* @param {Object} canDelete
-*/
-                    updateEach: loop,
-                    /**
-* Iterates over each element
-* @param {Object} callback
-*/
-                    "each": function(callback){
-                        loop(function(val, key){
-                            callback(val, key);
-                            return false;
-                        });
-                    },
-                    /**
-* Deletes each element if callback returns true
-* @param {Object} callback
-*/
-                    "deleteEach": function(callback){
-                        loop(function(val, key){
-                            return callback(val, key);
-                        }, true);
-                    }
-                });
-                return result;
-            }; //end of cursor
-            var result = dbPromise = promise.db(dbName);
-            $.extend(result, {
-                "promise": dbPromise,
-                /**
-* Sets the version of a database
-* @param {Object} callback
-* @param {Object} versionNumber - optional. If nothing is specified, version is incremented by 1.
-*/
-                "setVersion": function(versionNumber){
-                    return promise.versionTransaction(dbPromise, versionNumber);
-                },
-                
-                /**
-* Creates a new transaction that can be used to create
-* @param {Object} objectStoreNames
-* @param {Object} transactionType - IDBTransaction.
-*/
-                "transaction": function(objectStoreNames, transactionType){
-                    var transactionPromise = null;
-                    if (transactionType === IDBTransaction.VERSION_CHANGE) {
-                        transactionPromise = promise.versionTransaction(dbPromise, transactionType);
-                    }
-                    else {
-                        transactionPromise = promise.transaction(dbPromise, objectStoreNames, transactionType);
-                    }
-                    var result = transactionPromise;
-                    $.extend(result, {
-                        "objectStore": function(objectStoreName, canCreate){
-                            return objectStore(transactionPromise, objectStoreName, canCreate);
-                        }
-                    });
-                    return result;
-                },
-                "objectStore": function(objectStoreName, canCreate){
-                    var transactionPromise = promise.transaction(dbPromise, objectStoreName, IDBTransaction.READ_WRITE);
-                    return objectStore(transactionPromise, objectStoreName, canCreate);
-                },
-                /**
-* Creates a new object store with the set version transaction
-* @param {Object} objectStoreName
-* @param {Object} createOptions
-*/
-                "createObjectStore": function(objectStoreName, canCreate){
-                    return objectStore(promise.versionTransaction(dbPromise), objectStoreName, canCreate);
-                },
-                
-                "deleteObjectStore": function(objectStoreName){
-                    return promise.deleteObjectStore(promise.versionTransaction(dbPromise), objectStoreName);
-                }
-            });//end of return values for indexedDB()
-            return result;
-        }
-    });
+(function($, undefined){
+	$.extend({
+		/**
+		 * The IndexedDB object used to open databases
+		 * @param {Object} dbName - name of the database
+		 * @param {Object} config - version, onupgradeneeded, onversionchange, schema
+		 */
+		"indexedDB": function(dbName, config){
+			var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
+			var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
+			var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
+			
+			if (config) {
+				// Parse the config argument
+				if (typeof config === "number") config = {
+					"version": config
+				};
+				
+				var version = config.version;
+				if (config.schema && !version) {
+					var max = -1;
+					for (key in config.schema) {
+						max = max > key ? man : key;
+					}
+					version = config.version || max;
+				}
+			}
+			
+			var wrap = {
+				"request": function(req, args){
+					return $.Deferred(function(dfd){
+						try {
+							var idbRequest = typeof req === "function" ? req(args) : req;
+							idbRequest.onsuccess = function(e){
+								//console.log("Success", idbRequest, e, this);
+								dfd.resolveWith(idbRequest, [idbRequest.result, e]);
+							};
+							idbRequest.onerror = function(e){
+								//console.log("Error", idbRequest, e, this);
+								dfd.rejectWith(idbRequest, [idbRequest.error, e]);
+							};
+							if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
+								idbRequest.onblocked = function(e){
+									//console.log("Blocked", idbRequest, e, this);
+									dfd.notifyWith(idbRequest, [idbRequest.result, e]);
+								};
+							}
+							if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
+								idbRequest.onupgradeneeded = function(e){
+									//console.log("Upgrade", idbRequest, e, this);
+									dfd.notifyWith(idbRequest, [idbRequest.result, e]);
+								};
+							}
+						} catch (e) {
+							e.name = "exception";
+							dfd.rejectWith(idbRequest, ["exception", e]);
+						}
+					});
+				},
+				// Wraps the IDBTransaction to return promises, and other dependent methods
+				"transaction": function(idbTransaction){
+					var transactionInProgress = {
+						"objectStore": function(storeName){
+							try {
+								return wrap.objectStore(idbTransaction.objectStore(storeName));
+							} catch (e) {
+								idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+								return wrap.objectStore(null);
+							}
+						},
+						"abort": function(){
+							idbTransaction.abort();
+						}
+					};
+					if (idbTransaction && idbTransaction.mode === idbTransaction.VERSION_CHANGE) {
+						$.extend(transactionInProgress, {
+							"createObjectStore": function(storeName, storeParams){
+								try {
+									return wrap.objectStore(idbTransaction.db.createObjectStore(storeName, storeParams));
+								} catch (e) {
+									idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+								}
+							},
+							"deleteObjectStore": function(storeName){
+								try {
+									idbTransaction.db.deleteObjectStore(storeName);
+								} catch (e) {
+									idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+								}
+							}
+						});
+					}
+					return transactionInProgress;
+				},
+				"objectStore": function(idbObjectStore){
+					var result = {};
+					
+					// Define CRUD operations
+					var crudOps = ["add", "put", "get", "delete", "clear", "getAll"];
+					for (var i = 0; i < crudOps.length; i++) {
+						result[crudOps[i]] = (function(op){
+							return function(){
+								return wrap.request(function(args){
+									return idbObjectStore[op].apply(idbObjectStore, args);
+								}, arguments);
+							}
+						})(crudOps[i]);
+					}
+					
+					result.each = function(callback, range, direction){
+						return wrap.cursor(function(){
+							return idbObjectStore.openCursor(range, direction);
+						}, callback);
+					};
+					
+					result.index = function(name){
+						return wrap.index(function(){
+							return idbObjectStore.index(name);
+						});
+					};
+					
+					if (idbObjectStore.transaction.mode === idbObjectStore.transaction.VERSION_CHANGE) {
+						result.createIndex = function(prop, indexName, options){
+							return wrap.index(function(){
+								return idbObjectStore.createIndex(indexName, prop, options);
+							});
+						};
+						
+						result.deleteIndex = function(indexName){
+							return idbObjectStore.deleteIndex(indexName);
+						}
+					}
+					
+					return result;
+				},
+				
+				"cursor": function(idbCursor, callback){
+					return $.Deferred(function(dfd){
+						try {
+							var cursorReq = typeof idbCursor === "function" ? idbCursor() : idbCursor;
+							cursorReq.onsuccess = function(e){
+								if (!cursorReq.result) {
+									dfd.resolveWith(cursorReq, [null, e]);
+									return;
+								}
+								var elem = {
+									// Delete, update do not move 
+									"delete": function(){
+										cursorReq.result["delete"]();
+									},
+									"update": function(data){
+										cursorReq.result["update"](data);
+									},
+									"advance": function(count){
+										cursorReq.result["advance"](count);
+									},
+									"continue": function(key){
+										this.data = key;
+									},
+									"key": cursorReq.result.key,
+									"value": cursorReq.result.value
+								};
+								dfd.notifyWith(cursorReq, [elem, e]);
+								callback.apply(cursorReq, [elem]);
+								cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
+							};
+							cursorReq.onerror = function(e){
+								dfd.rejectWith(cursorReq, [cursorReq.result, e]);
+							};
+						} catch (e) {
+							e.type = "exception";
+							dfd.rejectWith(cursorReq, [null, e]);
+						}
+					});
+				},
+				
+				"index": function(index){
+					try {
+						var idbIndex = (typeof index === "function" ? index() : index);
+					} catch (e) {
+						idbIndex = null;
+					}
+					console.log(idbIndex, index);
+					return {
+						"each": function(callback, range, direction){
+							return wrap.cursor(function(){
+								return idbIndex.openCursor(range, direction);
+							}, callback);
+						},
+						"eachKey": function(callback, range, direction){
+							return wrap.cursor(function(){
+								return idbIndex.openCursor(range, direction);
+							}, callback);
+						}
+					};
+				}
+			}
+			
+			// Start with opening the database
+			var dbPromise = wrap.request(function(){
+				//console.log("Trying to open DB with", version);
+				return version ? indexedDB.open(dbName, version) : indexedDB.open(dbName);
+			});
+			dbPromise.then(function(db, e){
+				//console.log("DB opened at", db.version);
+				db.onversionchange = function(){
+					// Try to automatically close the database if there is a version change request
+					if (!(config && config.onversionchange && config.onversionchange() !== false)) {
+						db.close();
+					}
+				};
+			}, function(error, e){
+				// Nothing much to do if an error occurs
+			}, function(db, e){
+				if (e && e.type === "upgradeneeded" && config && config.schema) {
+					// Assuming that version is always an integer 
+					//console.log("Upgrading DB to ", db.version);
+					for (var i = e.oldVersion; i <= e.newVersion; i++) {
+						typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
+					}
+					typeof config.upgrade === "function" && config.upgrade.call(this, wrap.transaction(this.transaction));
+				}
+			});
+			
+			return $.extend(dbPromise, {
+				"cmp": function(key1, key2){
+					return indexedDB.cmp(key1, key2);
+				},
+				"deleteDatabase": function(){
+					// Kinda looks ugly coz DB is opened before it needs to be deleted. 
+					// Blame it on the API 
+					return $.Deferred(function(dfd){
+						dbPromise.then(function(db, e){
+							db.close();
+							wrap.request(function(){
+								return indexedDB.deleteDatabase(dbName);
+							}).then(function(result, e){
+								dfd.resolveWith(this, [result, e]);
+							}, function(error, e){
+								dfd.rejectWith(this, [error, e]);
+							}, function(db, e){
+								dfd.notifyWith(this, [db, e]);
+							});
+						}, function(error, e){
+							dfd.rejectWith(this, [error, e]);
+						}, function(db, e){
+							dfd.notifyWith(this, [db, e]);
+						});
+					});
+				},
+				"transaction": function(storeNames, mode){
+					mode = mode || 1;
+					return $.Deferred(function(dfd){
+						dbPromise.then(function(db, e){
+							try {
+								var idbTransaction = db.transaction(storeNames, mode);
+								idbTransaction.onabort = idbTransaction.onerror = function(e){
+									dfd.rejectWith(idbTransaction, [e]);
+								};
+								idbTransaction.oncomplete = function(e){
+									dfd.resolveWith(idbTransaction, [e]);
+								};
+							} catch (e) {
+								e.type = "exception";
+								dfd.rejectWith(this, [e]);
+							}
+							dfd.notifyWith(idbTransaction, [wrap.transaction(idbTransaction)]);
+						}, function(err, e){
+							dfd.rejectWith(this, [err, e]);
+						});
+						
+					});
+				},
+				"objectStore": function(storeName, mode){
+					var me = this, result = {};
+					
+					function op(callback){
+						return $.Deferred(function(dfd){
+							me.transaction(storeName, mode).then(function(){
+								// Nothing to do when transaction is complete
+							}, function(err, e){
+								// If transaction fails, CrudOp fails
+								dfd.rejectWith(this, [err, e]);
+							}, function(trans){
+								try {
+									callback(trans.objectStore(storeName)).then(function(result, e){
+										dfd.resolveWith(this, [result, e]);
+									}, function(err, e){
+										dfd.rejectWith(this, [err, e]);
+									});
+								} catch (e) {
+									e.name = "exception";
+									dfd.rejectWith(trans, [e, e]);
+								}
+							});
+						});
+					};
+					
+					function crudOp(opName, args){
+						return op(function(wrappedObjectStore){
+							return wrappedObjectStore[opName].apply(wrappedObjectStore, args);
+						});
+					}
+					
+					function indexOp(opName, indexName, args){
+						return op(function(wrappedObjectStore){
+							console.log(wrappedObjectStore);
+							var index = wrappedObjectStore.index(indexName);
+							return index[opName].apply(index[opName], args);
+							//return objectStore[opName].apply(objectStore, opName, args);
+						});
+					}
+					
+					var crud = ["add", "delete", "get", "put", "clear", "count", "each"];
+					for (var i = 0; i < crud.length; i++) {
+						result[crud[i]] = (function(op){
+							return function(){
+								return crudOp(op, arguments);
+							}
+						})(crud[i]);
+					}
+					
+					result.index = function(indexName){
+						return {
+							"each": function(callback){
+								return indexOp("each", indexName, [callback]);
+							},
+							"eachKey": function(callback){
+								return indexOp("eachKey", indexName, [callback]);
+							}
+						};
+					}
+					
+					return result;
+				}
+			});
+		}
+	});
 })(jQuery);

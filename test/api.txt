@@ -1,0 +1,35 @@
+indexedDB(open)
+						.done(function(dbRequest.result){this = dbRequest})
+						.fail(function(dbRequest.error) {this = dbRequest})
+						.progress(function(trans)	{this = dbRequest; 
+															this = dbRequest;
+															trans.createObjectStore
+															trans.deleteObjectStore()
+															trans.abort();
+															trans.done()
+															trans.onerror()
+															trans.progress()
+													}) // called on upgrade and blocked
+						
+						.transaction(store, mode)
+													.progress(function(trans){
+														this = transaction; 
+														trans.objectStore()
+														trans.abort()
+													})
+													.done(function(onCompleteEvent) {this = transaction}) // transaction is complete
+													.fail(function(onErrorEvent   ) {this = transaction}) // onabort, or onerror, or exception
+													
+													
+						.objectStore(storeName, mode)
+													.add(), .delete(), .put(), .clear()
+													.forEach(elem){this.delete(), this.update(newElem)},
+													.index()
+													.createIndex()
+													.deleteIndex()
+													
+													.fail()
+													
+														
+						.deleteDatabase()  - returns a promise
+						.cmp() - returns 1, 0, -1
