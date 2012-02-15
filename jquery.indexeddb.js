@@ -20,7 +20,7 @@
 				if (config.schema && !version) {
 					var max = -1;
 					for (key in config.schema) {
-						max = max > key ? man : key;
+						max = max > key ? max : key;
 					}
 					version = config.version || max;
 				}
@@ -59,7 +59,7 @@
 				},
 				// Wraps the IDBTransaction to return promises, and other dependent methods
 				"transaction": function(idbTransaction){
-					var transactionInProgress = {
+					return {
 						"objectStore": function(storeName){
 							try {
 								return wrap.objectStore(idbTransaction.objectStore(storeName));
@@ -68,29 +68,24 @@
 								return wrap.objectStore(null);
 							}
 						},
+						"createObjectStore": function(storeName, storeParams){
+							try {
+								return wrap.objectStore(idbTransaction.db.createObjectStore(storeName, storeParams));
+							} catch (e) {
+								idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+							}
+						},
+						"deleteObjectStore": function(storeName){
+							try {
+								idbTransaction.db.deleteObjectStore(storeName);
+							} catch (e) {
+								idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+							}
+						},
 						"abort": function(){
 							idbTransaction.abort();
 						}
 					};
-					if (idbTransaction && idbTransaction.mode === idbTransaction.VERSION_CHANGE) {
-						$.extend(transactionInProgress, {
-							"createObjectStore": function(storeName, storeParams){
-								try {
-									return wrap.objectStore(idbTransaction.db.createObjectStore(storeName, storeParams));
-								} catch (e) {
-									idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-								}
-							},
-							"deleteObjectStore": function(storeName){
-								try {
-									idbTransaction.db.deleteObjectStore(storeName);
-								} catch (e) {
-									idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-								}
-							}
-						});
-					}
-					return transactionInProgress;
 				},
 				"objectStore": function(idbObjectStore){
 					var result = {};
@@ -119,16 +114,14 @@
 						});
 					};
 					
-					if (idbObjectStore.transaction.mode === idbObjectStore.transaction.VERSION_CHANGE) {
-						result.createIndex = function(prop, indexName, options){
-							return wrap.index(function(){
-								return idbObjectStore.createIndex(indexName, prop, options);
-							});
-						};
-						
-						result.deleteIndex = function(indexName){
-							return idbObjectStore.deleteIndex(indexName);
-						}
+					result.createIndex = function(prop, indexName, options){
+						return wrap.index(function(){
+							return idbObjectStore.createIndex(indexName, prop, options);
+						});
+					};
+					
+					result.deleteIndex = function(indexName){
+						return idbObjectStore.deleteIndex(indexName);
 					}
 					
 					return result;
@@ -180,7 +173,7 @@
 					} catch (e) {
 						idbIndex = null;
 					}
-					console.log(idbIndex, index);
+					//console.log(idbIndex, index);
 					return {
 						"each": function(callback, range, direction){
 							return wrap.cursor(function(){
@@ -304,7 +297,7 @@
 					
 					function indexOp(opName, indexName, args){
 						return op(function(wrappedObjectStore){
-							console.log(wrappedObjectStore);
+							//console.log(wrappedObjectStore);
 							var index = wrappedObjectStore.index(indexName);
 							return index[opName].apply(index[opName], args);
 							//return objectStore[opName].apply(objectStore, opName, args);

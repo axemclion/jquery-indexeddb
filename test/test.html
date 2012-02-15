@@ -70,6 +70,7 @@
             					"1": function(versionTransaction){
             						var objectStore1 = versionTransaction.createObjectStore(DB.OBJECT_STORE_1);
             						objectStore1.createIndex("prop1", DB.INDEX1_ON_OBJECT_STORE_1);
+            						objectStore1.add(data(), new Date());
             						var objectStore3 = versionTransaction.createObjectStore(DB.OBJECT_STORE_3);
             					},
             					"2": function(versionTransaction){
@@ -79,6 +80,9 @@
             					"3": function(versionTransaction){
             						var objectStore2 = versionTransaction.objectStore(DB.OBJECT_STORE_2);
             						var index1OnObjectStore2 = objectStore2.createIndex("prop1", DB.INDEX_1_ON_OBJECT_STORE_2);
+            						versionTransaction.objectStore(DB.OBJECT_STORE_1).each(function(elem){
+            							console.log(elem);
+            						})
             					}
             				}
             			}));
@@ -120,8 +124,8 @@
             		},
             		"Index Operations": function(){
             			_($.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).index(DB.INDEX1_ON_OBJECT_STORE_1).each(function(elem){
-							console.log(elem);
-						}), "Index")
+            				console.log(elem);
+            			}), "Index")
             		}
             	};
             })();
