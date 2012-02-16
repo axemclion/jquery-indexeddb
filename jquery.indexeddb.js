@@ -205,13 +205,17 @@
 			}, function(error, e){
 				// Nothing much to do if an error occurs
 			}, function(db, e){
-				if (e && e.type === "upgradeneeded" && config && config.schema) {
-					// Assuming that version is always an integer 
-					//console.log("Upgrading DB to ", db.version);
-					for (var i = e.oldVersion; i <= e.newVersion; i++) {
-						typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
+				if (e && e.type === "upgradeneeded") {
+					if (config && config.schema) {
+						// Assuming that version is always an integer 
+						//console.log("Upgrading DB to ", db.version);
+						for (var i = e.oldVersion; i <= e.newVersion; i++) {
+							typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
+						}
 					}
-					typeof config.upgrade === "function" && config.upgrade.call(this, wrap.transaction(this.transaction));
+					if (config && typeof config.upgrade === "function") {
+						config.upgrade.call(this, wrap.transaction(this.transaction));
+					}
 				}
 			});
 			
