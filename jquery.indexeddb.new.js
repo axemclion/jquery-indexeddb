@@ -91,7 +91,7 @@
 					var result = {};
 					
 					// Define CRUD operations
-					var crudOps = ["add", "put", "get", "delete", "clear", "getAll"];
+					var crudOps = ["add", "put", "get", "delete", "clear", "count"];
 					for (var i = 0; i < crudOps.length; i++) {
 						result[crudOps[i]] = (function(op){
 							return function(){
@@ -104,7 +104,7 @@
 					
 					result.each = function(callback, range, direction){
 						return wrap.cursor(function(){
-							return idbObjectStore.openCursor(range, direction);
+							return idbObjectStore.openCursor(wrap.range(range), direction);
 						}, callback);
 					};
 					
@@ -127,6 +127,18 @@
 					return result;
 				},
 				
+				"range": function(r){
+					if ($.isArray(r)) {
+						if (r.length === 1) {
+							return IDBKeyRange.only(r[0]);
+						} else {
+							return IDBKeyRange.bound(r[0], r[1], r[2] || true, r[3] || true);
+						}
+					} else {
+						return r;
+					}
+				},
+				
 				"cursor": function(idbCursor, callback){
 					return $.Deferred(function(dfd){
 						try {
@@ -139,23 +151,34 @@
 								var elem = {
 									// Delete, update do not move 
 									"delete": function(){
-										cursorReq.result["delete"]();
+										return wrap.request(function(){
+											return cursorReq.result["delete"]();
+										});
 									},
 									"update": function(data){
-										cursorReq.result["update"](data);
+										return wrap.request(function(){
+											return cursorReq.result["update"](data);
+										});
 									},
-									"advance": function(count){
-										cursorReq.result["advance"](count);
-									},
-									"continue": function(key){
+									"next": function(key){
 										this.data = key;
 									},
 									"key": cursorReq.result.key,
 									"value": cursorReq.result.value
 								};
 								dfd.notifyWith(cursorReq, [elem, e]);
-								callback.apply(cursorReq, [elem]);
-								cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
+								var result = callback.apply(cursorReq, [elem]);
+								try {
+									if (result === false) {
+										dfd.resolveWith(cursorReq, [null, e]);
+									} else if (typeof result === "number") {
+										cursorReq.result["advance"].apply(cursorReq.result, [result]);
+									} else {
+										cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
+									}
+								} catch (e) {
+									dfd.rejectWith(cursorReq, [cursorReq.result, e]);
+								}
 							};
 							cursorReq.onerror = function(e){
 								dfd.rejectWith(cursorReq, [cursorReq.result, e]);
@@ -177,12 +200,12 @@
 					return {
 						"each": function(callback, range, direction){
 							return wrap.cursor(function(){
-								return idbIndex.openCursor(range, direction);
+								return idbIndex.openCursor(wrap.range(range), direction);
 							}, callback);
 						},
 						"eachKey": function(callback, range, direction){
 							return wrap.cursor(function(){
-								return idbIndex.openCursor(range, direction);
+								return idbIndex.openKeyCursor(wrap.range(range), direction);
 							}, callback);
 						}
 					};
@@ -261,9 +284,14 @@
 								e.type = "exception";
 								dfd.rejectWith(this, [e]);
 							}
-							dfd.notifyWith(idbTransaction, [wrap.transaction(idbTransaction)]);
+							try {
+								dfd.notifyWith(idbTransaction, [wrap.transaction(idbTransaction)]);
+							} catch (e) {
+								e.type = "exception";
+								dfd.rejectWith(this, [e]);
+							}
 						}, function(err, e){
-							dfd.rejectWith(this, [err, e]);
+							dfd.rejectWith(this, [e, err]);
 						});
 						
 					});
@@ -301,10 +329,8 @@
 					
 					function indexOp(opName, indexName, args){
 						return op(function(wrappedObjectStore){
-							//console.log(wrappedObjectStore);
 							var index = wrappedObjectStore.index(indexName);
 							return index[opName].apply(index[opName], args);
-							//return objectStore[opName].apply(objectStore, opName, args);
 						});
 					}
 					
@@ -319,10 +345,10 @@
 					
 					result.index = function(indexName){
 						return {
-							"each": function(callback){
+							"each": function(callback, range){
 								return indexOp("each", indexName, [callback]);
 							},
-							"eachKey": function(callback){
+							"eachKey": function(callback, range){
 								return indexOp("eachKey", indexName, [callback]);
 							}
 						};
