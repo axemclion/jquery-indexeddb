@@ -2,12 +2,12 @@
 	"name" : "indexeddb",
 	"version" : 1.0,
 	"title" : "IndexedDB API Plugin",
-	"description" : "",
-	"keywords" : "",
-	"homepage" : "",
+	"description" : "An easy to use Jquery API over the HTML5 IndexedDB API with smart defaults and support for promises, ",
+	"keywords" : "IndexedDB, storage, database, data",
+	"homepage" : "http://nparashuram.com/jquery-indexeddb/",
 	"docs" : "",
 	"demo" : "",
-	"files" : ""	
+	"files" : "jquery.indexeddb.js"	
 	"author" : {
 		"name" : "Parashuram Narasimhan",
 		"email" : "contact@nparashuram.com",
