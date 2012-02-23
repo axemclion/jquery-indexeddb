@@ -16,55 +16,33 @@
             	INDEX1_ON_OBJECT_STORE_2: "Index1_ObjectStore2"
             };
             
+            var sample = {
+            	obj: function(){
+            		return {
+            			"String": "Sample " + new Date(),
+            			"Int": this.integer(),
+            			"Float": Math.random(),
+            			"Boolean": true
+            		}
+            	},
+            	integer: function(arg){
+            		return parseInt(Math.random() * (arg || 100));
+            	}
+            };
+            
             var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
             var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
             var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
             
-            function ok(count, mode, msg){
-            	console.debug.apply(console, [count + "[" + mode + "]> " + msg, arguments.callee.caller.arguments]);
+            function ok(msg){
+            	console.debug.apply(console, [msg, arguments.callee.caller.arguments]);
             }
             
-            function fail(count, mode, msg){
-            	console.error.apply(console, [count + "[" + mode + "]> " + msg, arguments.callee.caller.arguments]);
-            }
-            
-            for (var i = 0; i < 10; i++) {
-            	(function(mode, count){
-            		window.setTimeout(function(){
-            			var dbOpenReq = indexedDB.open(DB.NAME);
-            			dbOpenReq.onsuccess = function(e){
-            				var db = dbOpenReq.result;
-            				ok(count, mode, "Starting transaction");
-            				var transaction = db.transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2], mode);
-            				transaction.onerror = function(e){
-            					fail(count, mode, "Transaction error");
-            				};
-            				transaction.onabort = function(e){
-            					fail(count, mode, "Transaction error");
-            				};
-            				transaction.oncomplete = function(){
-            					ok(count, mode, "Transaction done");
-            				};
-            				var objectStore = transaction.objectStore(DB.OBJECT_STORE_1);
-            				if (mode === 0) {
-            					var req = objectStore.count();
-            				} else {
-            					var req = objectStore.add(1000, Math.random());
-            				}
-            				
-            				req.onerror = function(){
-            					fail(count, mode, "Object Store Op");
-            				};
-            				req.onsuccess = function(){
-            					ok(count, mode, "Object Store Op");
-            				};
-            			};
-            			dbOpenReq.onerror = function(e){
-            				error(count, "Could not open DB");
-            			}
-            		}, 100);
-            	})(parseInt((Math.random() * 100) % 2), i);
-            }
+            $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
+            	ok(true, "Added to object store" + key);
+            }, function(err){
+            	ok(false, "Could not add to object store" + err);
+            });
         </script>
     </body>
 </html>

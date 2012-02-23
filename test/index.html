@@ -228,12 +228,32 @@
         	
         	asyncTest("Operation on  Non-existant ObjectStore", function(){
         		$.indexedDB(DB.NAME).objectStore("NewObjStore").add("100", sample.integer()).then(function(){
-        			ok(true, "Created an object store and put the data in it");
+        			ok(false, "Created an object store and put the data in it");
         			_("Cannot open non existant object store");
         			start();
         		}, function(){
-        			ok(false, "Should have created the object store as no schema was specified");
+        			ok(true, "Should have created the object store as no schema was specified");
         			_("Cannot open non existant object store");
+        			start();
+        		});
+        	});
+        	
+        	asyncTest("Object Store - create object store", function(){
+        		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
+        			ok(true, "Added to object store" + key);
+        			start();
+        		}, function(){
+        			ok(false, "Could not add to object store" + key);
+        			start();
+        		});
+        	});
+        	
+        	asyncTest("Object Store - create object store, existing store", function(){
+        		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
+        			ok(true, "Added to object store" + key);
+        			start();
+        		}, function(){
+        			ok(false, "Could not add to object store" + key);
         			start();
         		});
         	});
@@ -490,6 +510,34 @@
         		});
         	});
         	
+        	asyncTest("Multiple object store ops", function(){
+        		var testCount = 0;
+        		for (var i = 0; i < 10; i++) {
+        			(function(mode, count){
+        				window.setTimeout(function(){
+        					if (mode === 1) {
+        						$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2, mode).add(sample.obj()).then(function(res, e){
+        							_(count + "> Added to Object Store 1: " + mode);
+        							ok(true, count + "> Added to Object Store 1: " + mode);
+        							if (++testCount >= 9) start();
+        						}, function(err, e){
+        							ok(false, count + "> Could not add to Object Store 1: " + mode);
+        							_(count + "> Could not add to Object Store 1: " + mode);
+        							if (++testCount >= 9) start();
+        						});
+        					} else {
+        						$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2, mode).each(function(elem){
+        							_(count + "> Reading " + elem.key);
+        							ok(true, count + "> Reading " + elem.key);
+        							if (++testCount >= 9) start();
+        							return false;
+        						});
+        					}
+        				}, 1);
+        			})(parseInt((Math.random() * 100) % 2), i);
+        		}
+        	});
+        	
         	asyncTest("Multiple transactions at same time", function(){
         		var testCount = 0;
         		for (var i = 0; i < 10; i++) {
@@ -509,8 +557,8 @@
         								_(count + "> Added to Object Store 1: " + mode);
         								ok(true, count + "> Added to Object Store 1: " + mode);
         							}, function(err, e){
-        								ok(false, count + "> Could not add to Object Store 1: " + mode);
         								_(count + "> Could not add to Object Store 1: " + mode);
+        								ok(false, count + "> Could not add in transaction to Object Store 1: " + mode);
         							});
         						} else {
         							transaction.objectStore(DB.OBJECT_STORE_1).each(function(elem){
@@ -522,7 +570,6 @@
         					});
         				}, 0);
         			})(parseInt((Math.random() * 100) % 2), i);
-        			
         		}
         	});
         });

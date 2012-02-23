@@ -1,0 +1,23 @@
+{
+	"name" : "indexeddb",
+	"version" : 1.0,
+	"title" : "IndexedDB API Plugin",
+	"description" : "",
+	"keywords" : "",
+	"homepage" : "",
+	"docs" : "",
+	"demo" : "",
+	"files" : ""	
+	"author" : {
+		"name" : "Parashuram Narasimhan",
+		"email" : "contact@nparashuram.com",
+		"url" : "http://nparashuram.com"
+	},
+	"licenses": [{
+       "type": "GPLv2",
+       "url": "http://www.example.com/licenses/gpl.html"
+   	}],
+	"dependencies" : {
+		"jquery" : ">=1.5.x"
+	}
+}

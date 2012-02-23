@@ -301,12 +301,7 @@
 					
 					function op(callback){
 						return $.Deferred(function(dfd){
-							me.transaction(storeName, mode).then(function(){
-								// Nothing to do when transaction is complete
-							}, function(err, e){
-								// If transaction fails, CrudOp fails
-								dfd.rejectWith(this, [err, e]);
-							}, function(trans){
+							function onTransactionProgress(trans, callback){
 								try {
 									callback(trans.objectStore(storeName)).then(function(result, e){
 										dfd.resolveWith(this, [result, e]);
@@ -317,6 +312,44 @@
 									e.name = "exception";
 									dfd.rejectWith(trans, [e, e]);
 								}
+							}
+							
+							me.transaction(storeName, typeof mode === "number" ? mode : 1).then(function(){
+								// Nothing to do when transaction is complete
+							}, function(err, e){
+								// If transaction fails, CrudOp fails
+								if (err.code === err.NOT_FOUND_ERR && (mode === true || typeof mode === "object")) {
+									var db = this.result;
+									db.close();
+									dbPromise = wrap.request(function(){
+										return indexedDB.open(dbName, db.version + 1);
+									});
+									dbPromise.then(function(db, e){
+										db.onversionchange = function(){
+											// Try to automatically close the database if there is a version change request
+											if (!(config && config.onversionchange && config.onversionchange() !== false)) {
+												db.close();
+											}
+										};
+										me.transaction(storeName, typeof mode === "number" ? mode : 1).then(function(){
+											// Nothing much to do
+										}, function(err, e){
+											dfd.rejectWith(this, [err, e]);
+										}, function(trans){
+											onTransactionProgress(trans, callback);
+										});
+									}, function(err, e){
+										dfd.rejectWith(this, [err, e]);
+									}, function(db, e){
+										db.createObjectStore(storeName, mode === true ? {
+											"autoIncrement": true
+										} : mode);
+									});
+								} else {
+									dfd.rejectWith(this, [err, e]);
+								}
+							}, function(trans){
+								onTransactionProgress(trans, callback);
 							});
 						});
 					};
