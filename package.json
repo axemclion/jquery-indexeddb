@@ -5,8 +5,8 @@
 	"description" : "An easy to use Jquery API over the HTML5 IndexedDB API with smart defaults and support for promises, ",
 	"keywords" : "IndexedDB, storage, database, data",
 	"homepage" : "http://nparashuram.com/jquery-indexeddb/",
-	"docs" : "",
-	"demo" : "",
+	"docs" : "https://github.com/axemclion/jquery-indexeddb/blob/gh-pages/docs/README.md",
+	"demo" : "http://nparashuram.com/jquery-indexeddb/example/index.html",
 	"files" : "jquery.indexeddb.js"	
 	"author" : {
 		"name" : "Parashuram Narasimhan",
@@ -14,9 +14,12 @@
 		"url" : "http://nparashuram.com"
 	},
 	"licenses": [{
-       "type": "GPLv2",
-       "url": "http://www.example.com/licenses/gpl.html"
-   	}],
+       	"type": "GPLv2",
+       	"url": "http://www.gnu.org/copyleft/gpl.html"
+   	}, 	{
+		"type" : "Apache License, Version 2.0",
+		"url" : "http://www.apache.org/licenses/LICENSE-2.0"
+	}],
 	"dependencies" : {
 		"jquery" : ">=1.5.x"
 	}

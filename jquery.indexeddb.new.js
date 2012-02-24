@@ -114,7 +114,14 @@
 						});
 					};
 					
-					result.createIndex = function(prop, indexName, options){
+					result.createIndex = function(prop, options, indexName){
+						if (arguments.length === 2 && typeof options === "string") {
+							indexName = arguments[1]
+							options = null;
+						}
+						if (!indexName) {
+							indexName = prop;
+						}
 						return wrap.index(function(){
 							return idbObjectStore.createIndex(indexName, prop, options);
 						});

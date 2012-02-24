@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        <title>A self contained example for the Jquery-IndexedDB plugin</title>
+    </head>
+    <body>
+        <h1>Jquery IndexedDB API example</h1>
+        <div id = "controls">
+            <a href = "javascript:loaddata()">Load Data from Database</a>
+            <a href = "javascript:()"></a>
+        </div>
+        <table id = "content">
+            <tr class = "sample">
+                <td class = "key">
+                </td>
+                <td class = "value">
+                </td>
+            </tr>
+        </table>
+        <div id = "console">
+        </div>
+        <!-- Main IndexedDB Example functions -->
+        <script type = "text/javascript">
+            var key = null;
+            var dbConnection = $.indexedDB("ECommerceSite", {
+            	"schema": {
+            		"1": function(versionTransaction){
+            			var catalog = versionTransaction.createObjectStore("catalog", {
+            				"keyPath": "itemId"
+            			});
+            			catalog.createIndex("")
+            		}
+            	}
+            });
+            
+            function loaddata(){
+            	dbConnection.objectStore("objectStore1").each(function(elem){
+            		var row = document.getElementsByClassName("sample")[0].innerHTML;
+            	});
+            }
+        </script>
+        <!-- End of Main IndexedDB Example functions -->
+        <!-- Helper functions -->
+        <script tyoe = "text/javascript">
+            var console = {
+            	"log": function(msg){
+            	
+            	}
+            };
+        </script>
+    </body>
+</html>

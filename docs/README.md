@@ -1,1 +1,7 @@
-Documentation for the IndexedDB APIs will go here
+Jquery-IndexedDB API Reference
+===============================
+
+$.indexedDB
+-----------
+
+
