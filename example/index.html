@@ -2,51 +2,271 @@
 <html>
     <head>
         <title>A self contained example for the Jquery-IndexedDB plugin</title>
+        <script type = "text/javascript" src="../lib/jquery.min.js">
+        </script>
+        <script type = "text/javascript" src="../jquery.indexeddb.new.js">
+        </script>
+        <link href="style.css" rel="stylesheet"/>
     </head>
     <body>
-        <h1>Jquery IndexedDB API example</h1>
-        <div id = "controls">
-            <a href = "javascript:loaddata()">Load Data from Database</a>
-            <a href = "javascript:()"></a>
+        <div>
+            <h2>My Web Store
+                <div class = "action">
+                    <a href = "javascript:loadFromDB('wishlist');loadFromDB('cart');loadFromDB('catalog');">Load all LocalDBs</a>
+                    <a href = "javascript:deleteDB()">Delete DB</a>
+                </div>
+            </h2>
         </div>
-        <table id = "content">
-            <tr class = "sample">
-                <td class = "key">
-                </td>
-                <td class = "value">
-                </td>
-            </tr>
-        </table>
+        <div id = "tables">
+            <div class = "table-container">
+                <div class = "controls">
+                    <h2>Catalog</h2>
+                    <a href = "javascript:loadFromDB('catalog')">Load from Local DB</a>
+                    <a href = "javascript:downloadCatalog();">Save from Server TO DB</a>
+                </div>
+                <table id = "catalog" width="400">
+                    <tr>
+                        <th class = "header key">
+                            Id
+                        </th>
+                        <th class = "header value action">
+                            Object
+                            <div style ="float:right; width : 200px">
+                                <a href = "javascript:loadFromDB('catalog')">Show all</a>
+                                <a href = "javascript:sort('catalog', 'price')">Sort by Price</a>
+                            </div>
+                        </th>
+                        <th class = "header actions">
+                            Actions
+                        </th>
+                    </tr>
+                </table>
+            </div>
+            <div class = "table-container">
+                <div class = "controls">
+                    <h2>Cart</h2>
+                    <a href = "javascript:loadFromDB('cart')">Load from Local DB</a>
+                    <a href = "javascript:emptyDB('cart'); loadFromDB('cart')">Clear Table</a>
+                </div>
+                <table id = "cart">
+                    <tr>
+                        <th>
+                            Id
+                        </th>
+                        <th>
+                            Object
+                            <div class = "action" style ="float:right; width : 200px">
+                                <a href = "javascript:loadFromDB('cart')">Show all</a>
+                                <a href = "javascript:sort('cart', 'itemId')">Sort by ItemId</a>
+                            </div>
+                        </th>
+                        <th>
+                            Actions
+                        </th>
+                    </tr>
+                </table>
+            </div>
+            <div class = "table-container">
+                <div class = "controls">
+                    <h2>wishlist</h2>
+                    <a href = "javascript:loadFromDB('wishlist')">Load from Local DB</a>
+                    <a href = "javascript:emptyDB('wishlist'); loadFromDB('wishlist')">Clear Table</a>
+                </div>
+                <table id = "wishlist">
+                    <tr>
+                        <th>
+                            Id
+                        </th>
+                        <th>
+                            Object
+                        </th>
+                        <th>
+                            Actions
+                        </th>
+                    </tr>
+                </table>
+            </div>
+        </div>
         <div id = "console">
         </div>
         <!-- Main IndexedDB Example functions -->
         <script type = "text/javascript">
             var key = null;
-            var dbConnection = $.indexedDB("ECommerceSite", {
+            // Simply open the database once so that it is created with the required tables
+            $.indexedDB("MyECommerceSite", {
             	"schema": {
             		"1": function(versionTransaction){
             			var catalog = versionTransaction.createObjectStore("catalog", {
             				"keyPath": "itemId"
             			});
-            			catalog.createIndex("")
+            			catalog.createIndex("price");
+            		},
+            		// This was added in the next version of the site
+            		"2": function(versionTransaction){
+            			var cart = versionTransaction.createObjectStore("cart", {
+            				"autoIncrement": true
+            			});
+            			cart.createIndex("itemId");
+            			var wishlist = versionTransaction.createObjectStore("wishlist", {
+            				"autoIncrement": false,
+            				"keyPath": "itemId"
+            			});
+            			wishlist.createIndex("name");
             		}
             	}
+            }).done(function(){
+            	// Once the DB is opened with the object stores set up, show data from all tables
+            	loadFromDB("cart");
+            	loadFromDB("wishlist");
+            	loadFromDB("catalog");
+				downloadCatalog();
             });
             
-            function loaddata(){
-            	dbConnection.objectStore("objectStore1").each(function(elem){
-            		var row = document.getElementsByClassName("sample")[0].innerHTML;
+            function deleteDB(){
+            	// Delete the database 
+            	$.indexedDB("MyECommerceSite").deleteDatabase();
+            }
+            
+            // Download a catalog from the server and save it to the DB
+            function downloadCatalog(){
+            	$.getJSON("catalog.json", function(data){
+            		$.indexedDB("MyECommerceSite").transaction("catalog").then(function(){
+            			console.log("Transaction completed, all data inserted");
+            		}, function(err, e){
+            			console.log("Transaction NOT completed", err, e);
+            		}, function(transaction){
+            			var catalog = transaction.objectStore("catalog");
+            			catalog.clear();
+            			$.each(data, function(i){
+            				_(catalog.add(this));
+            			})
+            		});
+            	});
+            }
+            
+            // Iterate over each record in a table and display it
+            function loadFromDB(table){
+            	emptyTable(table);
+            	_($.indexedDB("MyECommerceSite").objectStore(table).each(function(elem){
+            		addRowInHTMLTable(table, elem.key, elem.value);
+            	}));
+            }
+            
+            // Sort a table based on an index that is setup
+            function sort(table, key){
+            	emptyTable(table);
+            	_($.indexedDB("MyECommerceSite").objectStore(table).index(key).each(function(elem){
+            		addRowInHTMLTable(table, elem.key, elem.value);
+            	}));
+            }
+            
+            function emptyDB(table){
+            	_($.indexedDB("MyECommerceSite").objectStore(table).clear());
+            }
+            
+            // Read an item from catalog and save it in cart
+            function addToCart(itemId){
+            	$.indexedDB("MyECommerceSite").objectStore("catalog").get(itemId).then(function(item){
+            		$.indexedDB("MyECommerceSite").objectStore("cart").add(item).done(function(){
+            			loadFromDB("cart");
+            		});
+            	}, function(err, e){
+            		alert("Could not add to cart");
+            	});
+            }
+            
+            // Delete an item from cart
+            function removeFromCart(itemId){
+            	$.indexedDB("MyECommerceSite").objectStore("cart")["delete"](itemId).done(function(){
+            		loadFromDB("cart");
+            	});
+            }
+            
+            // Using transactions, read object from cart, add it to wishlist if it does not exist 
+            // and then delete it from the cart. If any operation failes, all these will fail
+            function moveToWishlist(cartId){
+            	var transaction = $.indexedDB("MyECommerceSite").transaction(["cart", "wishlist"]);
+            	transaction.done(function(){
+            		loadFromDB("cart");
+            		loadFromDB("wishlist");
+            	});
+            	transaction.progress(function(transaction){
+            		transaction.objectStore("cart").get(cartId).done(function(item){
+            			transaction.objectStore("wishlist").add(item).fail(function(){
+            				alert("Already in the wishlist");
+            			}).done(function(){
+            				_(transaction.objectStore("cart")["delete"](cartId));
+            			});
+            			
+            		})
+            	});
+            }
+            
+            // Read an item from catalog and add it to wishlist
+            function addToWishlist(itemId){
+            	$.indexedDB("MyECommerceSite").objectStore("catalog").get(itemId).then(function(item){
+            		$.indexedDB("MyECommerceSite").objectStore("wishlist").add(item).done(function(){
+            			loadFromDB("wishlist");
+            		})
+            	}, function(err, e){
+            		alert("Could not add to cart");
+            	});
+            }
+            
+            function removeFromWishList(itemId){
+            	$.indexedDB("MyECommerceSite").objectStore("wishlist")["delete"](itemId).done(function(){
+            		loadFromDB("wishlist");
             	});
             }
         </script>
         <!-- End of Main IndexedDB Example functions -->
         <!-- Helper functions -->
-        <script tyoe = "text/javascript">
-            var console = {
-            	"log": function(msg){
-            	
+        <script type = "text/javascript">
+            function emptyTable(tableName){
+            	var table = document.getElementById(tableName);
+            	var header = table.getElementsByTagName("tr")[0];
+            	table.innerHTML = "";
+            	header && table.appendChild(header);
+            }
+            
+            function addRowInHTMLTable(tableName, key, value){
+            	var actions = {
+            		"catalog": {
+            			"Add to cart": "addToCart",
+            			"Add to wishlist": "addToWishlist"
+            		},
+            		"cart": {
+            			"Move to Wishlist": "moveToWishlist",
+            			"Remove from Cart": "removeFromCart"
+            		},
+            		"wishlist": {
+            			"Remove from Wishlist": "removeFromWishList"
+            		}
             	}
-            };
+            	table = document.getElementById(tableName);
+            	var row = document.createElement("tr");
+            	var html = ["<tr>"];
+            	html = html.concat(["<td class = 'key'>", key, "</td>"]);
+            	html = html.concat(["<td class = 'value'>", JSON.stringify(value).replace(/,/g, ",\n"), "</td>"]);
+            	html.push("<td class = 'action'>");
+            	for (var action in actions[tableName]) {
+            		html = html.concat("<a href = 'javascript:", actions[tableName][action], "(", key, ")'>", action, "</a>");
+            	}
+            	html.push("</td>");
+            	html.push("</tr>");
+            	row.innerHTML = html.join("");
+            	table.appendChild(row);
+            }
+            
+            function _(promise){
+            	promise.then(function(a, e){
+            		console.log("Action completed", e.type, a, e);
+            	}, function(a, e){
+            		console.log("Action completed", e.type, a, e);
+            	}, function(a, e){
+            		console.log("Action completed", e.type, a, e);
+            	})
+            }
         </script>
     </body>
 </html>

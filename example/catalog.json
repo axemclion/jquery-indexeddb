@@ -1,0 +1,45 @@
+[{
+	"itemId": 1001,
+	"name": "Desktop",
+	"description": "A normal looking desktop computer",
+	"price": 100,
+	
+	"rating": 2
+
+}, {
+	"itemId": 1002,
+	"name": "Laptop",
+	"description": "A laptop computer",
+	"price": 200,
+	
+	"rating": 4
+}, {
+	"itemId": 1003,
+	"name": "Tablet",
+	"description": "A tablet computer",
+	"price": 150,
+	"stock": 4
+}, {
+	"itemId": 1004,
+	"name": "Embedded",
+	"description": "Whatever",
+	"stock": 4
+}, {
+	"itemId": 1005,
+	"name": "EInk Reader",
+	"description": "Like a tablet, but different screen",
+	"price": 150,
+	"stock": 4
+}, {
+	"itemId": 1006,
+	"name": "Phone",
+	"description": "No more a computer",
+	"price": 250,
+	"stock": 4
+}, {
+	"itemId": 1007,
+	"name": "Music players",
+	"description": "the outer imits ? ",
+	"price": 10,
+	"stock": 4
+}]
