@@ -290,3 +290,11 @@ deletePromise.progress(function(db, event){
 Compare Keys
 ---------------------
 A convenience method to compare keys in a database. Can be used as `$.indexedDB("dbName").cmp(key1, key2)` and return 1,0 or -1 when key1 is greater than, equal to or less than key2 respectively.  
+
+Links
+-------
+Some useful links
+
+* [IndexedDB W3C Specification] (http://www.w3.org/TR/IndexedDB/)
+* [IndexedDB API playground and examples] (http://nparashuram.com/IndexedDB)
+* [My work on IndexedDB] (http://blog.nparashuram.com/search/label/indexeddb)
