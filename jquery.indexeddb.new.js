@@ -276,6 +276,7 @@
 					});
 				},
 				"transaction": function(storeNames, mode){
+					!$.isArray(storeNames) && (storeNames = [storeNames]);
 					mode = mode || 1;
 					return $.Deferred(function(dfd){
 						dbPromise.then(function(db, e){
