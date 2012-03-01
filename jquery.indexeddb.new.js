@@ -6,7 +6,7 @@
 		 * @param {Object} config - version, onupgradeneeded, onversionchange, schema
 		 */
 		"indexedDB": function(dbName, config){
-			var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
+			var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 			var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 			var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
 			

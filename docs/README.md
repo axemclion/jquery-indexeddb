@@ -165,6 +165,11 @@ An object store can be opened inside a [transaction that is in progress] (#trans
 ``` javascript
 var objectStore = $.indexedDB("database_name").objectStore("objectStoreName", /* Optional */ mode );
 ``` 
+
+The `mode` parameter defaults to READ_WRITE and is similar to the `mode` parameter specified during a `transaction`. 
+
+As a convenience method, if the `mode` is set to `true` (instead of 0 or 1), an object store is created if it does not exist. Internally, the database is closed and opened with a higher version to trigger the version transaction where the object store can be created.  
+
 <a name = "crud"/>
 The above expression internally creates a transaction for this object store. The `mode` parameter is optional and similar to the [mode parameter] (#transactionMode) in transactions. 
 The CRUD methods on the object store are 

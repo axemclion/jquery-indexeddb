@@ -228,11 +228,11 @@
         	
         	asyncTest("Operation on  Non-existant ObjectStore", function(){
         		$.indexedDB(DB.NAME).objectStore("NewObjStore").add("100", sample.integer()).then(function(){
-        			ok(false, "Created an object store and put the data in it");
+        			ok(false, "Created an object store and put the data in it, when the object store does not exist");
         			_("Cannot open non existant object store");
         			start();
         		}, function(){
-        			ok(true, "Should have created the object store as no schema was specified");
+        			ok(true, "Fails as the object store does not exist");
         			_("Cannot open non existant object store");
         			start();
         		});
@@ -240,10 +240,21 @@
         	
         	asyncTest("Object Store - create object store", function(){
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
-        			ok(true, "Added to object store" + key);
+        			ok(true, "Object Store created due to the true parameter" + key);
         			start();
         		}, function(){
-        			ok(false, "Could not add to object store" + key);
+        			ok(false, "Could not add to object store coz it does not exist" + key);
+        			start();
+        		});
+        	});
+			
+			asyncTest("Object Store - create object store", function(){
+        		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2, true).add(sample.obj()).then(function(key){
+        			ok(true, "Object store already exists, so skipping creating it" + key);
+        			start();
+        		}, function(){
+        			ok(false , "Should not have failed as the object store already exists " + key);
+					_("Object Store exists, so should not have failed");
         			start();
         		});
         	});
@@ -602,7 +613,6 @@
             	var s = document.getElementsByTagName('script')[0];
             	s.parentNode.insertBefore(ga, s);
             })();
-            
         </script>
     </body>
 </html>
