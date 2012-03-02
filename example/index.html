@@ -118,7 +118,6 @@
             	// Once the DB is opened with the object stores set up, show data from all tables
             	loadFromDB("cart");
             	loadFromDB("wishlist");
-            	loadFromDB("catalog");
             	downloadCatalog();
             });
             
@@ -132,6 +131,7 @@
             	$.getJSON("catalog.json", function(data){
             		$.indexedDB("MyECommerceSite").transaction("catalog").then(function(){
             			console.log("Transaction completed, all data inserted");
+						loadFromDB("catalog");
             		}, function(err, e){
             			console.log("Transaction NOT completed", err, e);
             		}, function(transaction){
