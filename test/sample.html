@@ -38,10 +38,16 @@
             	console.debug.apply(console, [msg, arguments.callee.caller.arguments]);
             }
             
-            $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
-            	ok(true, "Added to object store" + key);
-            }, function(err){
-            	ok(false, "Could not add to object store" + err);
+            var p = $.indexedDB(DB.NAME, {
+            	"schema": {
+            		1: function(v){
+            			v.createObjectStore(DB.OBJECT_STORE_1);
+            		}
+            	}
+            }).objectStore(DB.OBJECT_STORE_1).add(sample.obj(), sample.integer()).then(function(){
+            	console.info(this, arguments);
+            }, function(){
+            	console.error(this, arguments);
             });
         </script>
     </body>

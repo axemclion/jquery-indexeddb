@@ -172,7 +172,7 @@
         	});
         	
         	module("Object Store");
-        	asyncTest("Simple ObjectStore", function(){
+        	asyncTest("Simple ObjectStore Add operation", function(){
         		var key = sample.integer();
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(sample.obj(), key).then(function(res, e){
         			equal(res, key, "Added Data to Objectstore1");
@@ -188,7 +188,14 @@
         		var key = sample.integer();
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
-        		objectStore.add(value, key);
+        		objectStore.add(value, key).then(function(){
+        			ok(true, "Added value to the database");
+        			start();
+        		}, function(){
+        			ok(false, "Could not add value to the database");
+        			_("Could not add to database");
+        			start();
+        		});
         		objectStore.get(key).then(function(val){
         			deepEqual(val, value, "Value of the returned object " + val);
         			_("Got object using key");
@@ -247,14 +254,14 @@
         			start();
         		});
         	});
-			
-			asyncTest("Object Store - create object store", function(){
+        	
+        	asyncTest("Object Store - create object store", function(){
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2, true).add(sample.obj()).then(function(key){
         			ok(true, "Object store already exists, so skipping creating it" + key);
         			start();
         		}, function(){
-        			ok(false , "Should not have failed as the object store already exists " + key);
-					_("Object Store exists, so should not have failed");
+        			ok(false, "Should not have failed as the object store already exists " + key);
+        			_("Object Store exists, so should not have failed");
         			start();
         		});
         	});
@@ -564,7 +571,7 @@
         						if (++testCount >= 9) start();
         					}, function(transaction){
         						if (mode === 1) {
-        							transaction.objectStore(DB.OBJECT_STORE_1).add(sample.obj(), Math.random()).then(function(res, e){
+        							transaction.objectStore(DB.OBJECT_STORE_1).add(sample.obj(), sample.integer()).then(function(res, e){
         								_(count + "> Added to Object Store 1: " + mode);
         								ok(true, count + "> Added to Object Store 1: " + mode);
         							}, function(err, e){
