@@ -26,7 +26,7 @@
 				}
 			}
             var doUpgrade = function(newV, oldV){ //This will be called from either onupgradeneeded or onsuccess, whichever is available first
-            if (config && config.schema) {
+           	 if (config && config.schema) {
                   // Assuming that version is always an integer 
                   //console.log("Upgrading DB to ", db.version);
                   for (var i = e.oldVersion; i <= e.newVersion; i++) {
@@ -235,12 +235,13 @@
 				//console.log("Trying to open DB with", version);
 				return version ? indexedDB.open(dbName, version) : indexedDB.open(dbName);
 			});
-			dbPromise.then(function(db, e){
-              var oldVersion = Number(db.version); // Checking if the onupgradeneeded has handled the version change
-              if(oldVersion !== version){ // If not
-                if(!db.setVerion) {throw new Error("Version Change not supported in this browser");} // If setVersion also not available then throw error
-                var setV = db.setVersion(version); //Set the version,  I would have wrapped this call under 'wrap' but then there is no way of passing the oldversion in argument
-                setV.onsuccess(doUpgrade(oldVersion, version)); // Handle version change manually
+		dbPromise.then(function(db, e){
+             	 	var oldVersion = Number(db.version); // Checking if the onupgradeneeded has handled the version change
+              		if(oldVersion !== version){ // If not
+                	if(db.setVerion) { // If setVersion also not available then throw error
+                		var setV = db.setVersion(version); //Set the version,  I would have wrapped this call under 'wrap' but then there is no way of passing the oldversion in argument
+                		setV.onsuccess(doUpgrade(oldVersion, db.version)); // Handle version change manually
+                	}
               }
 				//console.log("DB opened at", db.version);
 				db.onversionchange = function(){
