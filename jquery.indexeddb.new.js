@@ -29,7 +29,7 @@
            	 if (config && config.schema) {
                   // Assuming that version is always an integer 
                   //console.log("Upgrading DB to ", db.version);
-                  for (var i = e.oldVersion; i <= e.newVersion; i++) {
+                  for (var i = newV; i <= oldV; i++) { //I think the problem was here. Earlier it was e.oldVersion and e.newVersion.
                       typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
                   }
               }
