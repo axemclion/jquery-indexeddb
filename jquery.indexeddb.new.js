@@ -240,7 +240,7 @@
               		if(oldVersion !== version){ // If not
                 	if(db.setVerion) { // If setVersion also not available then throw error
                 		var setV = db.setVersion(version); //Set the version,  I would have wrapped this call under 'wrap' but then there is no way of passing the oldversion in argument
-                		setV.onsuccess(doUpgrade(oldVersion, db.version)); // Handle version change manually
+                		setV.onsuccess(doUpgrade(oldVersion, version)); // Handle version change manually
                 	}
               }
 				//console.log("DB opened at", db.version);
