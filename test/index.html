@@ -87,6 +87,7 @@
         						"autoIncrement": true
         					});
         					versionTransaction.objectStore(DB.OBJECT_STORE_1).each(function(elem){
+								elem.value.id = 10;
         						objectStore2.add(elem.value);
         					});
         					versionTransaction.objectStore(DB.OBJECT_STORE_1).createIndex("Int");

@@ -3,7 +3,7 @@ Jquery Plugin for the IndexedDB API
 
 Summary
 -------
-IndexedDB Jquery plugin demo - http://nparashuram.com/trialtool/index.html#example=/IndexedDB/jquery/trialtool.html
+IndexedDB Jquery plugin demo - http://nparashuram.com/jquery-indexeddb/index.html
 
 Background
 -----------

@@ -7,14 +7,27 @@
         <script type = "text/javascript" src="../jquery.indexeddb.new.js">
         </script>
         <script type = "text/javascript">
-            var DB = {
+            DB = {
             	NAME: "dbName",
             	OBJECT_STORE_1: "objectStore1",
             	OBJECT_STORE_2: "objectStore2",
             	OBJECT_STORE_3: "objectStore3",
+            	OBJECT_STORE_4: "objectStore4",
             	INDEX1_ON_OBJECT_STORE_1: "Index1_ObjectStore1",
             	INDEX1_ON_OBJECT_STORE_2: "Index1_ObjectStore2"
             };
+            
+            function _(msg){
+            	console.log(msg, arguments.callee.caller.arguments);
+            }
+            
+            function ok(){
+            	console.log(arguments)
+            }
+            
+            function start(){
+            
+            }
             
             var sample = {
             	obj: function(){
@@ -29,26 +42,50 @@
             		return parseInt(Math.random() * (arg || 100));
             	}
             };
-            
-            var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
-            var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
-            var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-            
-            function ok(msg){
-            	console.debug.apply(console, [msg, arguments.callee.caller.arguments]);
-            }
-            
-            var p = $.indexedDB(DB.NAME, {
-            	"schema": {
-            		1: function(v){
-            			v.createObjectStore(DB.OBJECT_STORE_1);
-            		}
-            	}
-            }).objectStore(DB.OBJECT_STORE_1).add(sample.obj(), sample.integer()).then(function(){
-            	console.info(this, arguments);
-            }, function(){
-            	console.error(this, arguments);
-            });
         </script>
+        <script type = "text/javascript">
+            function axe(){
+            	$.indexedDB(DB.NAME, {
+            		"schema": {
+            			"1": function(versionTransaction){
+            				var objectStore1 = versionTransaction.createObjectStore(DB.OBJECT_STORE_1);
+            				objectStore1.add(sample.obj(), sample.integer());
+            				objectStore1.add(sample.obj(), sample.integer());
+            				objectStore1.add(sample.obj(), sample.integer());
+            				versionTransaction.createObjectStore(DB.OBJECT_STORE_3);
+            				ok(true, "Done with v1");
+            			},
+            			"2": function(versionTransaction){
+            				var objectStore2 = versionTransaction.createObjectStore(DB.OBJECT_STORE_2, {
+            					"autoIncrement": true,
+            					"keyPath": "id"
+            				});
+            				
+            				versionTransaction.objectStore(DB.OBJECT_STORE_1).createIndex("Int");
+            				ok(true, "Done with v2");
+            			},
+            			"3": function(versionTransaction){
+            				versionTransaction.deleteObjectStore(DB.OBJECT_STORE_3);
+            				versionTransaction.objectStore(DB.OBJECT_STORE_2).createIndex("Number", DB.INDEX1_ON_OBJECT_STORE_2);
+            				ok(true, "Done with v3");
+            			}
+            		}
+            	}).then(function(db, e){
+            		ok(true, "Opened Database with schema");
+            		ok(db.objectStoreNames.length, 2, "Count of object Stores");
+            		_("DB with version opened");
+            		start();
+            	}, function(err, e){
+            		ok(false, "Could not open DB with schema");
+            		_("Could not open DB with schema");
+            		start();
+            	}, function(res, e){
+            		ok(e.type, "upgradeneeded", "Blocked due to upgrade needed");
+            		_("Database open in progress");
+            		start();
+            	});
+            }
+        </script>
+        <h1><a href = "javascript:axe()">AXE</a></h1>
     </body>
 </html>
