@@ -182,7 +182,7 @@
 									} else if (typeof result === "number") {
 										cursorReq.result["advance"].apply(cursorReq.result, [result]);
 									} else {
-										cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
+										cursorReq.result["continue"].apply(cursorReq.result, []);
 									}
 								} catch (e) {
 									dfd.rejectWith(cursorReq, [cursorReq.result, e]);
