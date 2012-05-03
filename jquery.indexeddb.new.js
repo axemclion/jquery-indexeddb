@@ -257,12 +257,6 @@
 					};
 				}
 				//console.log("DB opened at", db.version);
-				db.onversionchange = function(){
-					// Try to automatically close the database if there is a version change request
-					if (!(config && config.onversionchange && config.onversionchange() !== false)) {
-						db.close();
-					}
-				};
 			}, function(error, e){
 				// Nothing much to do if an error occurs
 			}, function(db, e){
