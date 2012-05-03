@@ -24,6 +24,7 @@
 					}
 					version = config.version || max;
 				}
+				version = Number(version);
 			}
 
 			var wrap = {
@@ -220,13 +221,13 @@
 			};
 
 			//This will be called from either onupgradeneeded or onsuccess, whichever is available first.
-			var doUpgrade = function(oldV, newV){
+			var doUpgrade = function(oldV, newV, transaction){
 				//console.log('Upgrading from', oldV, 'to', newV);
 				if (config && config.schema) {
 					//console.log("Upgrading DB to", newV);
 					for (var i = oldV; i <= newV; i++) {
 						if (typeof config.schema[i] === "function") {
-							config.schema[i].call(this, wrap.transaction(this.transaction));
+							config.schema[i].call(this, wrap.transaction(transaction));
 						}
 					}
 				}
@@ -243,13 +244,17 @@
 			dbPromise.then(function(db, e){
 				// Checking if the onupgradeneeded has handled the version change.
 				var oldVersion = Number(db.version);
-				if(oldVersion !== version){ // If not
-					if(db.setVerion) { // If setVersion also not available then throw error
-						//Set the version,  I would have wrapped this call under 'wrap' but then there is no way of passing the oldversion in argument.
-						var setV = db.setVersion(version);
-						// Handle version change manually
-						setV.onsuccess(doUpgrade(oldVersion, version));
-					}
+				//console.log(oldVersion, version || 'Highest Version');
+				if (version && oldVersion !== version && db.setVersion) {
+					//console.log('Calling setVersion with', version);
+					var setV = db.setVersion(version);
+					setV.onsuccess = function(e) {
+						doUpgrade(oldVersion, version, setV.transaction);
+					};
+					setV.onerror = function(e) {
+						alert('Failed to upgrade the database.');
+						db.close();
+					};
 				}
 				//console.log("DB opened at", db.version);
 				db.onversionchange = function(){
@@ -262,7 +267,7 @@
 				// Nothing much to do if an error occurs
 			}, function(db, e){
 				if (e && e.type === "upgradeneeded") {
-					doUpgrade(e.oldVersion,e.newVersion);
+					doUpgrade(e.oldVersion, e.newVersion, this.transaction);
 				}
 			});
 
