@@ -12,9 +12,9 @@
 
 			if (config) {
 				// Parse the config argument
-				if (typeof config === "number") config = {
-					"version": config
-				};
+				if (typeof config === "number") {
+					config = { "version": config };
+				}
 
 				var version = config.version;
 				if (config.schema && !version) {
@@ -25,18 +25,7 @@
 					version = config.version || max;
 				}
 			}
-            var doUpgrade = function(oldV, newV){ //This will be called from either onupgradeneeded or onsuccess, whichever is available first
-           	 if (config && config.schema) {
-                  // Assuming that version is always an integer 
-                  //console.log("Upgrading DB to ", db.version);
-                  for (var i = oldV; i <= newV; i++) { //I think the problem was here. Earlier it was e.oldVersion and e.newVersion.
-                      typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
-                  }
-              }
-              if (config && typeof config.upgrade === "function") {
-                  config.upgrade.call(this, wrap.transaction(this.transaction));
-              }
-          }
+
 			var wrap = {
 				"request": function(req, args){
 					return $.Deferred(function(dfd){
@@ -140,7 +129,7 @@
 
 					result.deleteIndex = function(indexName){
 						return idbObjectStore.deleteIndex(indexName);
-					}
+					};
 
 					return result;
 				},
@@ -228,21 +217,40 @@
 						}
 					};
 				}
-			}
+			};
+
+			//This will be called from either onupgradeneeded or onsuccess, whichever is available first.
+			var doUpgrade = function(oldV, newV){
+				//console.log('Upgrading from', oldV, 'to', newV);
+				if (config && config.schema) {
+					//console.log("Upgrading DB to", newV);
+					for (var i = oldV; i <= newV; i++) {
+						if (typeof config.schema[i] === "function") {
+							config.schema[i].call(this, wrap.transaction(this.transaction));
+						}
+					}
+				}
+				if (config && typeof config.upgrade === "function") {
+					config.upgrade.call(this, wrap.transaction(this.transaction));
+				}
+			};
 
 			// Start with opening the database
 			var dbPromise = wrap.request(function(){
 				//console.log("Trying to open DB with", version);
 				return version ? indexedDB.open(dbName, version) : indexedDB.open(dbName);
 			});
-		dbPromise.then(function(db, e){
-             	 	var oldVersion = Number(db.version); // Checking if the onupgradeneeded has handled the version change
-              		if(oldVersion !== version){ // If not
-                	if(db.setVerion) { // If setVersion also not available then throw error
-                		var setV = db.setVersion(version); //Set the version,  I would have wrapped this call under 'wrap' but then there is no way of passing the oldversion in argument
-                		setV.onsuccess(doUpgrade(oldVersion, version)); // Handle version change manually
-                	}
-              }
+			dbPromise.then(function(db, e){
+				// Checking if the onupgradeneeded has handled the version change.
+				var oldVersion = Number(db.version);
+				if(oldVersion !== version){ // If not
+					if(db.setVerion) { // If setVersion also not available then throw error
+						//Set the version,  I would have wrapped this call under 'wrap' but then there is no way of passing the oldversion in argument.
+						var setV = db.setVersion(version);
+						// Handle version change manually
+						setV.onsuccess(doUpgrade(oldVersion, version));
+					}
+				}
 				//console.log("DB opened at", db.version);
 				db.onversionchange = function(){
 					// Try to automatically close the database if there is a version change request
