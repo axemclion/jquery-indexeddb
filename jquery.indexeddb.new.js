@@ -9,13 +9,13 @@
 			var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 			var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 			var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-			
+
 			if (config) {
 				// Parse the config argument
-				if (typeof config === "number") config = {
-					"version": config
-				};
-				
+				if (typeof config === "number") {
+					config = { "version": config };
+				}
+
 				var version = config.version;
 				if (config.schema && !version) {
 					var max = -1;
@@ -24,8 +24,9 @@
 					}
 					version = config.version || max;
 				}
+				version = Number(version);
 			}
-			
+
 			var wrap = {
 				"request": function(req, args){
 					return $.Deferred(function(dfd){
@@ -89,7 +90,7 @@
 				},
 				"objectStore": function(idbObjectStore){
 					var result = {};
-					
+
 					// Define CRUD operations
 					var crudOps = ["add", "put", "get", "delete", "clear", "count"];
 					for (var i = 0; i < crudOps.length; i++) {
@@ -101,19 +102,19 @@
 							}
 						})(crudOps[i]);
 					}
-					
+
 					result.each = function(callback, range, direction){
 						return wrap.cursor(function(){
 							return idbObjectStore.openCursor(wrap.range(range), direction);
 						}, callback);
 					};
-					
+
 					result.index = function(name){
 						return wrap.index(function(){
 							return idbObjectStore.index(name);
 						});
 					};
-					
+
 					result.createIndex = function(prop, options, indexName){
 						if (arguments.length === 2 && typeof options === "string") {
 							indexName = arguments[1]
@@ -126,14 +127,14 @@
 							return idbObjectStore.createIndex(indexName, prop, options);
 						});
 					};
-					
+
 					result.deleteIndex = function(indexName){
 						return idbObjectStore.deleteIndex(indexName);
-					}
-					
+					};
+
 					return result;
 				},
-				
+
 				"range": function(r){
 					if ($.isArray(r)) {
 						if (r.length === 1) {
@@ -145,7 +146,7 @@
 						return r;
 					}
 				},
-				
+
 				"cursor": function(idbCursor, callback){
 					return $.Deferred(function(dfd){
 						try {
@@ -181,7 +182,7 @@
 									} else if (typeof result === "number") {
 										cursorReq.result["advance"].apply(cursorReq.result, [result]);
 									} else {
-										cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
+										cursorReq.result["continue"].apply(cursorReq.result, []);
 									}
 								} catch (e) {
 									dfd.rejectWith(cursorReq, [cursorReq.result, e]);
@@ -196,7 +197,7 @@
 						}
 					});
 				},
-				
+
 				"index": function(index){
 					try {
 						var idbIndex = (typeof index === "function" ? index() : index);
@@ -217,39 +218,54 @@
 						}
 					};
 				}
-			}
-			
+			};
+
+			//This will be called from either onupgradeneeded or onsuccess, whichever is available first.
+			var doUpgrade = function(oldV, newV, transaction){
+				//console.log('Upgrading from', oldV, 'to', newV);
+				if (config && config.schema) {
+					//console.log("Upgrading DB to", newV);
+					for (var i = oldV; i <= newV; i++) {
+						if (typeof config.schema[i] === "function") {
+							config.schema[i].call(this, wrap.transaction(transaction));
+						}
+					}
+				}
+				if (config && typeof config.upgrade === "function") {
+					config.upgrade.call(this, wrap.transaction(this.transaction));
+				}
+			};
+
 			// Start with opening the database
 			var dbPromise = wrap.request(function(){
 				//console.log("Trying to open DB with", version);
 				return version ? indexedDB.open(dbName, version) : indexedDB.open(dbName);
 			});
 			dbPromise.then(function(db, e){
-				//console.log("DB opened at", db.version);
-				db.onversionchange = function(){
-					// Try to automatically close the database if there is a version change request
-					if (!(config && config.onversionchange && config.onversionchange() !== false)) {
+				// Checking if the onupgradeneeded has handled the version change.
+				var oldVersion = Number(db.version);
+				//console.log(oldVersion, version || 'Highest Version');
+				if (version && oldVersion !== version && db.setVersion) {
+					//console.log('Calling setVersion with', version);
+					var setV = db.setVersion(version);
+					setV.onsuccess = function(e) {
+						doUpgrade(oldVersion, version, setV.transaction);
+					};
+					setV.onerror = function(e) {
+						alert('Failed to upgrade the database.');
 						db.close();
-					}
-				};
+					};
+				}
+				//console.log("DB opened at", db.version);
 			}, function(error, e){
 				//console.log(error, e);
 				// Nothing much to do if an error occurs
 			}, function(db, e){
 				if (e && e.type === "upgradeneeded") {
-					if (config && config.schema) {
-						// Assuming that version is always an integer 
-						//console.log("Upgrading DB to ", db.version);
-						for (var i = e.oldVersion; i <= e.newVersion; i++) {
-							typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
-						}
-					}
-					if (config && typeof config.upgrade === "function") {
-						config.upgrade.call(this, wrap.transaction(this.transaction));
-					}
+					doUpgrade(e.oldVersion, e.newVersion, this.transaction);
 				}
 			});
-			
+
 			return $.extend(dbPromise, {
 				"cmp": function(key1, key2){
 					return indexedDB.cmp(key1, key2);
@@ -302,12 +318,12 @@
 						}, function(err, e){
 							dfd.rejectWith(this, [e, err]);
 						});
-						
+
 					});
 				},
 				"objectStore": function(storeName, mode){
 					var me = this, result = {};
-					
+
 					function op(callback){
 						return $.Deferred(function(dfd){
 							function onTransactionProgress(trans, callback){
@@ -322,7 +338,7 @@
 									dfd.rejectWith(trans, [e, e]);
 								}
 							}
-							
+
 							me.transaction(storeName, typeof mode === "number" ? mode : 1).then(function(){
 								// Nothing to do when transaction is complete
 							}, function(err, e){
@@ -362,20 +378,20 @@
 							});
 						});
 					};
-					
+
 					function crudOp(opName, args){
 						return op(function(wrappedObjectStore){
 							return wrappedObjectStore[opName].apply(wrappedObjectStore, args);
 						});
 					}
-					
+
 					function indexOp(opName, indexName, args){
 						return op(function(wrappedObjectStore){
 							var index = wrappedObjectStore.index(indexName);
 							return index[opName].apply(index[opName], args);
 						});
 					}
-					
+
 					var crud = ["add", "delete", "get", "put", "clear", "count", "each"];
 					for (var i = 0; i < crud.length; i++) {
 						result[crud[i]] = (function(op){
@@ -384,7 +400,7 @@
 							}
 						})(crud[i]);
 					}
-					
+
 					result.index = function(indexName){
 						return {
 							"each": function(callback, range){
@@ -395,7 +411,7 @@
 							}
 						};
 					}
-					
+
 					return result;
 				}
 			});
