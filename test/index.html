@@ -30,8 +30,10 @@
         	var dbDeleteRequest = indexedDB.deleteDatabase(DB.NAME);
         	dbDeleteRequest.onsuccess = function(e){
         		//_("Database successfully deleted");
-        		startQunitTests();
-        		nextTest();
+        		window.setTimeout(function(){
+        			startQunitTests();
+        			nextTest();
+        		}, 1000)
         	};
         	dbDeleteRequest.onupgradeneeded = function(e){
         		var db = dbOpenRequest.result;
@@ -48,11 +50,11 @@
         function startQunitTests(){
         	queuedModule("Database");
         	queuedAsyncTest("Open Database without schema", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).then(function(res, e){
         			ok(true, "Database opened successfully");
         			_("DB opened");
-					start();
+        			start();
         			nextTest();
         		}, function(err, e){
         			ok(false, "Could not open database" + e);
@@ -68,7 +70,7 @@
         	});
         	
         	queuedAsyncTest("Open Database with schema", function(){
-        		
+        	
         		$.indexedDB(DB.NAME, {
         			"schema": {
         				"1": function(versionTransaction){
@@ -117,7 +119,7 @@
         	});
         	
         	queuedAsyncTest("DB with upgrade defination", function(){
-        		
+        	
         		$.indexedDB(DB.NAME, {
         			"version": 4,
         			"upgrade": function(versionTransaction){
@@ -143,7 +145,7 @@
         	});
         	
         	queuedAsyncTest("Open a lower version schema", function(){
-        		
+        	
         		$.indexedDB(DB.NAME, 1).then(function(res, e){
         			ok(false, "Should not have opened as DB was lower version");
         			_("Should not have opened as DB was lower version");
@@ -161,32 +163,36 @@
         		});
         	});
         	
-        	queuedAsyncTest("Cancel version transaction", function(){
-        		
-        		$.indexedDB(DB.NAME, {
-        			"version": 5,
-        			"upgrade": function(versionTransaction){
-        				versionTransaction.abort();
-        				ok(true, "Aborting Version 5 upgrade");
-        			}
-        		}).then(function(res, e){
-        			notEqual(res.version, 4, "Version 5 did not pass as it was aborted");
-        			start();
-        			nextTest();
-        		}, function(err, e){
-        			ok(true, "Error opening DB as version transaction was aborted");
-        			_("Database open aborted coz version transaction was cancelled");
-        			start();
-        			nextTest();
-        		}, function(res, e){
-        			start();
-        			stop();
-        		});
-        	});
-        	
+        	/*queuedAsyncTest("Cancel version transaction", function(){
+        	 $.indexedDB(DB.NAME, {
+        	 "version": 5,
+        	 "upgrade": function(versionTransaction){
+        	 versionTransaction.abort();
+        	 ok(true, "Aborting Version 5 upgrade");
+        	 }
+        	 }).then(function(res, e){
+        	 _("Version 5 did not pass as it was aborted");
+        	 notEqual(parseInt(res.version), 4, "Version 5 did not pass as it was aborted");
+        	 start();
+        	 nextTest();
+        	 }, function(err, e){
+        	 _("Database open aborted coz version transaction was cancelled");
+        	 ok(true, "Error opening DB as version transaction was aborted");
+        	 start();
+        	 nextTest();
+        	 }, function(res, e){
+        	 _("Transaction in progress", e);
+        	 if (e.type === "blocked") {
+        	 ok(false, "This transaction was blocked");
+        	 res.close();
+        	 start();
+        	 nextTest();
+        	 }
+        	 });
+        	 });*/
         	queuedModule("Object Store");
         	queuedAsyncTest("Simple ObjectStore Add operation", function(){
-        		
+        	
         		var key = sample.integer();
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(sample.obj(), key).then(function(res, e){
         			equal(res, key, "Added Data to Objectstore1");
@@ -202,7 +208,7 @@
         	});
         	
         	queuedAsyncTest("Object Store add and get", function(){
-        		
+        	
         		var key = sample.integer();
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
@@ -230,7 +236,7 @@
         	});
         	
         	queuedAsyncTest("ObjectStore update", function(){
-        		
+        	
         		var key = sample.integer();
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
@@ -261,7 +267,7 @@
         	});
         	
         	queuedAsyncTest("Operation on  Non-existant ObjectStore", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore("NewObjStore").add("100", sample.integer()).then(function(){
         			ok(false, "Created an object store and put the data in it, when the object store does not exist");
         			_("Cannot open non existant object store");
@@ -276,29 +282,29 @@
         	});
         	
         	queuedAsyncTest("Object Store - create object store", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
         			ok(true, "Object Store created due to the true parameter" + key);
         			_("Object Store created due to the true parameter" + key);
         			start();
         			nextTest();
         		}, function(){
-        			ok(false, "Could not add to object store coz it does not exist" + key);
-        			_("Could not add to object store coz it does not exist" + key);
+        			ok(false, "Could not add to object store as it does not exist");
+        			_("Could not add to object store coz it does not exist");
         			start();
         			nextTest();
         		});
         	});
         	
         	queuedAsyncTest("Object Store - create object store that already exists", function(){
-        		
+        		_("Trying to create an object store that already exists");
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2, true).add(sample.obj()).then(function(key){
         			ok(true, "Object store already exists, so skipping creating it" + key);
         			_("Object store already exists, so skipping creating it" + key);
         			start();
         			nextTest();
         		}, function(){
-        			ok(false, "Should not have failed as the object store already exists " + key);
+        			ok(false, "Should not have failed as the object store already exists ");
         			_("Object Store exists, so should not have failed");
         			start();
         			nextTest();
@@ -306,7 +312,7 @@
         	});
         	
         	queuedAsyncTest("Object Store - Add data to existing store", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
         			_("Added to object store" + key);
         			ok(true, "Added to object store" + key);
@@ -320,7 +326,7 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			ok(true, elem.key);
         			start();
@@ -338,7 +344,7 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each with range", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			equal(elem.key >= 1 && elem.key <= 50, true, elem.key + " is between 1 and 50");
         			_(elem);
@@ -357,7 +363,7 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each in reverse", function(){
-        		
+        	
         		var prev = Infinity;
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			equal(prev > elem.key, true, elem.key + " is less that the previous value " + prev);
@@ -376,7 +382,7 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each, update and delete", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			if (elem.key % 3 === 0) {
         				elem["delete"]().then(function(){
@@ -418,7 +424,7 @@
         	});
         	
         	queuedAsyncTest("Skip and advance", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			ok(true, "Moving 2 spaces " + elem.key);
         			start();
@@ -436,7 +442,7 @@
         	});
         	
         	queuedAsyncTest("Iteration operation fails", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			ok(true, "Break at " + elem.key + (elem.key % 3 === 0));
         			start();
@@ -456,7 +462,7 @@
         	});
         	
         	queuedAsyncTest("Continue to next key", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			elem.next();
         			start();
@@ -474,7 +480,7 @@
         	
         	queuedModule("Indexes");
         	queuedAsyncTest("Index Iteration", function(){
-        		
+        	
         		var key = sample.integer();
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
@@ -495,7 +501,7 @@
         	});
         	
         	queuedAsyncTest("Index iteration with keyCursor", function(){
-        		
+        	
         		var key = sample.integer();
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2);
@@ -517,7 +523,7 @@
         	
         	queuedModule("Transactions");
         	queuedAsyncTest("Simple transaction", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			equal(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -546,7 +552,7 @@
         	});
         	
         	queuedAsyncTest("Simple transaction with mode", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3], 1).then(function(e){
         			equal(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -564,7 +570,7 @@
         	});
         	
         	queuedAsyncTest("Aborted transaction", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			notEqual(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -587,7 +593,7 @@
         	});
         	
         	queuedAsyncTest("Transaction with non-existant object store", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).transaction(["Error ", DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			notEqual(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -602,7 +608,7 @@
         	});
         	
         	queuedAsyncTest("Transaction aborts due to exception when in progress", function(){
-        		
+        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			notEqual(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -619,7 +625,7 @@
         	});
         	
         	queuedAsyncTest("Multiple object store ops", function(){
-        		
+        	
         		var testCount = 0;
         		for (var i = 0; i < 10; i++) {
         			(function(mode, count){
@@ -657,7 +663,7 @@
         	});
         	
         	queuedAsyncTest("Multiple transactions at same time", function(){
-        		
+        	
         		var testCount = 0;
         		for (var i = 0; i < 10; i++) {
         			(function(mode, count){

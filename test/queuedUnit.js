@@ -46,7 +46,9 @@
 	/**
 	 * Once the current test is over, call nextTest() to start running the next test
 	 */
+	var timer = null;
 	function nextTest(){
+		window.clearTimeout(timer);
 		if (testQueue.length <= 0) {
 			console.log("All tests completed");
 			return;
@@ -61,6 +63,11 @@
 		} else if (current.args.length === 3) {
 			asyncTest(current.name, currentargs[1], current.args[2]);
 		}
+		/*timer = window.setTimeout(function(){
+			ok(false, "Timeout exceeded for this test, so moving on to next test");
+			start();
+			nextTest();
+		}, 1000);*/
 	}
 	
 	window["queuedAsyncTest"] = queuedAsyncTest;

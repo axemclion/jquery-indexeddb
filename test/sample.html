@@ -1,69 +1,67 @@
 <!doctype html>
 <html>
     <head>
-    	<meta charset="utf-8">
+        <meta charset="utf-8">
     </head>
     <body>
         <script type = "text/javascript" src="../lib/jquery.min.js">
         </script>
-        <script type = "text/javascript" src="../jquery.indexeddb.new.js">
+        <script type = "text/javascript" src = "../jquery.indexeddb.new.js">
+        </script>
+        <script type = "text/javascript" src = "sampleData.js">
         </script>
         <script type = "text/javascript">
-            DB = {
-            	NAME: "dbName",
-            	OBJECT_STORE_1: "objectStore1",
-            	OBJECT_STORE_2: "objectStore2",
-            	OBJECT_STORE_3: "objectStore3",
-            	OBJECT_STORE_4: "objectStore4",
-            	INDEX1_ON_OBJECT_STORE_1: "Index1_ObjectStore1",
-            	INDEX1_ON_OBJECT_STORE_2: "Index1_ObjectStore2"
-            };
-            
             function _(msg){
-            	console.log(msg, arguments.callee.caller.arguments);
+            	console.info(">>>>", msg, arguments.callee.caller.arguments);
             }
             
             function ok(){
             	console.log(arguments)
             }
             
-            function start(){
+            var start = nextTest = function(){
             
             }
             
-            var sample = {
-            	obj: function(){
-            		return {
-            			"String": "Sample " + new Date(),
-            			"Int": this.integer(),
-            			"Float": Math.random(),
-            			"Boolean": true
-            		}
-            	},
-            	integer: function(arg){
-            		return parseInt(Math.random() * (arg || 100));
-            	}
-            };
+            var equal = notEqual = function(){
+            	console.info(arguments);
+            }
         </script>
         <script type = "text/javascript">
-        	var req = window.mozIndexedDB.open(DB.NAME);
-			req.onsuccess = function(){
-				var db = req.result;
-				console.log(db.objectStoreNames);
-				var transaction = db.transaction(DB.OBJECT_STORE_1, 1);
-			}
-			
-            function axe(){
-				var key = sample.integer();
-            	$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(sample.obj(), key).then(function(res, e){
-            		_("Added " + key + " to objectStore1");
+            var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+            /*var dbDeleteRequest = indexedDB.deleteDatabase(DB.NAME);
+             dbDeleteRequest.onsuccess = function(e){
+             _("Database successfully deleted");
+             test();
+             };
+             dbDeleteRequest.onupgradeneeded = function(e){
+             var db = dbOpenRequest.result;
+             _("Database upgrade needed");
+             };
+             dbDeleteRequest.onerror = function(e){
+             _("Error deleting DB");
+             };
+             dbDeleteRequest.onblocked = function(e){
+             _("Deleting DB Blocked. Try closing the database and then deleting it", dbDeleteRequest.error, e.type);
+             };*/
+            test();
+            function test(){
+            	var prev = Infinity;
+            	$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
+            		equal(prev > elem.key, true, elem.key + " is less that the previous value " + prev);
+            		prev = elem.key;
             		start();
+            		stop();
+            	}, null, 2).then(function(){
+            		ok(true, "Iteration complete");
+            		start();
+            		nextTest();
             	}, function(){
-            		_("Could not add data to objectStore");
+            		ok(false, "Iteration complete");
             		start();
+            		nextTest();
             	});
             }
         </script>
-        <h1><a href = "javascript:axe()">AXE</a></h1>
     </body>
 </html>
