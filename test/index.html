@@ -208,17 +208,16 @@
         	});
         	
         	queuedAsyncTest("Object Store add and get", function(){
-        	
         		var key = sample.integer();
         		var value = sample.obj();
-        		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
-        		objectStore.add(value, key).then(function(){
-        			ok(true, "Added value to the database");
-        			_("Added value to the database ");
+        		_("Trying to add" + key + " and " + JSON.stringify(value));
+        		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(value, key).then(function(res, e){
+        			ok(true, "Added " + res + " to the database");
+        			_("Added" + res + "to the database ");
         			start();
-        			objectStore.get(key).then(function(val){
+        			$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).get(res).then(function(val){
         				deepEqual(val, value, "Value of the returned object " + val);
-        				_("Got object using key");
+        				_("Got object using" + res + " key");
         				start();
         				nextTest();
         			}, function(){
@@ -236,14 +235,12 @@
         	});
         	
         	queuedAsyncTest("ObjectStore update", function(){
-        	
         		var key = sample.integer();
         		var value = sample.obj();
-        		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
-        		objectStore.add(value, key).then(function(val, e){
+        		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(value, key).then(function(val, e){
         			value["modified"] = sample.integer();
-        			objectStore.put(value, key).then(function(){
-        				objectStore.get(key).then(function(val){
+        			$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).put(value, key).then(function(){
+        				$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).get(key).then(function(val){
         					deepEqual(value, val, "Got back the updated value ");
         					start();
         					nextTest();
