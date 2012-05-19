@@ -681,7 +681,7 @@
         						}
         					}, function(transaction){
         						if (mode === 1) {
-        							transaction.objectStore(DB.OBJECT_STORE_1).add(sample.obj(), sample.integer()).then(function(res, e){
+        							transaction.objectStore(DB.OBJECT_STORE_1).add(sample.obj(), count).then(function(res, e){
         								_(count + "> Added to Object Store 1: " + mode);
         								ok(true, count + "> Added to Object Store 1: " + mode);
         							}, function(err, e){
