@@ -49,6 +49,7 @@
         
         function startQunitTests(){
         	queuedModule("Database");
+
         	queuedAsyncTest("Open Database without schema", function(){
         	
         		$.indexedDB(DB.NAME).then(function(res, e){
@@ -367,7 +368,7 @@
         			prev = elem.key;
         			start();
         			stop();
-        		}, null, 2).then(function(){
+        		}, null, $.indexedDB.IDBCursor.PREV).then(function(){
         			ok(true, "Iteration complete");
         			start();
         			nextTest();
@@ -550,7 +551,7 @@
         	
         	queuedAsyncTest("Simple transaction with mode", function(){
         	
-        		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3], 1).then(function(e){
+        		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3], $.indexedDB.IDBTransaction.READ_WRITE).then(function(e){
         			equal(e.type, "complete", "Transaction completed successfully");
         			start();
         			nextTest();
@@ -655,7 +656,13 @@
         						});
         					}
         				}, 1);
-        			})(parseInt((Math.random() * 100) % 2), i);
+        			})((function(){
+        				if (parseInt(Math.random() * 100) % 2) {
+        					return $.indexedDB.IDBTransaction.READ;
+        				} else {
+        					return $.indexedDB.IDBTransaction.READ_WRITE;
+        				}
+        			}()), i);
         		}
         	});
         	
@@ -697,7 +704,13 @@
         						}
         					});
         				}, 0);
-        			})(parseInt((Math.random() * 100) % 2), i);
+        			})((function(){
+        				if (parseInt(Math.random() * 100) % 2) {
+        					return $.indexedDB.IDBTransaction.READ;
+        				} else {
+        					return $.indexedDB.IDBTransaction.READ_WRITE;
+        				}
+        			}()), i);
         		}
         	});
         };
