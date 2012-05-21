@@ -7,11 +7,11 @@
         </script>
         <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js">
         </script>
-        <script type="text/javascript" src="queuedUnit.js">
+        <script type="text/javascript" src="../lib/queuedUnit.js">
         </script>
         <script type = "text/javascript" src = "sampleData.js">
         </script>
-        <script type="text/javascript" src="../jquery.indexeddb.new.js">
+        <script type="text/javascript" src="../jquery.indexeddb.js">
         </script>
         <script type ="text/javascript">
         function _(msg){
@@ -193,7 +193,6 @@
         	 });*/
         	queuedModule("Object Store");
         	queuedAsyncTest("Simple ObjectStore Add operation", function(){
-        	
         		var key = sample.integer();
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(sample.obj(), key).then(function(res, e){
         			equal(res, key, "Added Data to Objectstore1");
@@ -310,7 +309,6 @@
         	});
         	
         	queuedAsyncTest("Object Store - Add data to existing store", function(){
-        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_4, true).add(sample.obj()).then(function(key){
         			_("Added to object store" + key);
         			ok(true, "Added to object store" + key);
@@ -521,7 +519,6 @@
         	
         	queuedModule("Transactions");
         	queuedAsyncTest("Simple transaction", function(){
-        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			equal(e.type, "complete", "Transaction completed successfully");
         			start();
