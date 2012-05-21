@@ -3,53 +3,166 @@
     <head>
         <title>Jquery IndexedDB Plugin</title>
         <meta charset="utf-8">
+        <link href="style.css" type="text/css" rel="stylesheet"/>
+        <script src="lib/jquery.min.js" type="text/javascript">
+        </script>
+        <script src="jquery.indexeddb.js" type="text/javascript">
+        </script>
     </head>
     <body>
-        <h1>JQuery IndexedDB Plugin</h1>
-        <div>
-            <h3>Links</h3>
-            <ul>
-                <li>
-                    <a href = "demo/index.html">Demo</a>
-                </li>
-                <li>
-                    <a href = "example/index.html">Example</a>
-                </li>
-                <li>
-                    <a href = "https://github.com/axemclion/jquery-indexeddb/blob/gh-pages/docs/README.md">API Documentation</a>
-                </li>
-                <li>
-                    <a href = "test/index.html">Test Cases</a>
-                </li>
-                <li>
-                    <a href = "/trialtool/index.html#example=/IndexedDB/jquery/demo/trialtool.html">API Playground</a>.
-                </li>
-            </ul>
+        <div id = "content-wrap">
+            <h1>JQuery IndexedDB Plugin</h1>
+            <div id = "content">
+                <div id = "download">
+                	<a href = "jquery.indexeddb.js" target = "_blank" class = "punch">
+						Download jquery.indexeddb.js
+					</a>
+                </div>
+                <p>
+                    <a href = "http://www.w3.org/TR/IndexedDB/">IndexedDB</a>
+                    is a database inside a browser to save and retrieve objects on the browser/client.
+                </p>
+                <p>
+                    The Jquery IndexedDB Plugin is a wrapper over IndexedDB, making it easier to use with Jquery. 
+                    <ul>
+                        <li>
+                            Don't worry out browser differences (<a href = "http://blog.nparashuram.com/2012/05/indexeddb-setversion-vs-onupgradeneeded.html">setVersion/onupgradeneeded</a>).
+                        </li>
+                        <li>
+                            Use Jquery promises in place of requests 
+                        </li>
+                        <li>
+                            Supports chaining, less verbose syntax
+                        </li>
+                    </ul>
+                </p>
+                <div>
+                    <h3>Try it Now!</h3>
+                    <pre id = "tryit"></pre>
+                    <div id = "log">
+                    </div>
+                    <button id = "runit">
+                        Run It
+                    </button>
+                    <h3>Compare IndexedDB API and jQuery Plugin code</h3>
+                    <p>
+                        Compare the code written using the IndexedDB API vs the jQuery Plugin.
+                        <br/>
+                        <a href = "demo/index.html">Check out the differences.</a>
+                    </p>
+                    <script type = "text/javascript" id = "tryitcode">
+                        // Code to create object stores and add data
+                        (function(){
+                        	$.indexedDB("databaseName", {
+                        		"schema": {
+                        			"1": function(versionTransaction){
+                        				versionTransaction.createObjectStore("objectStore1");
+                        			},
+                        			"2": function(versionTransaction){
+                        				versionTransaction.createObjectStore("objectStore2");
+                        			}
+                        		}
+                        	}).transaction(["objectStore1", "objectStore2"]).then(function(){
+                        		log("Transaction completed");
+                        	}, function(){
+                        		log("Transaction aborted");
+                        	}, function(t){
+                        		log("Transaction in progress");
+                        		t.objectStore("objectStore1").add({
+                        			"valueProp": "val",
+                        			"anotherProp": 2
+                        		}, 1).then(function(){
+                        			log("Data added");
+                        		}, function(){
+                        			log("Error adding data");
+                        		});
+                        	});
+                        })
+                    </script>
+                    <script type = "text/javascript">
+                        var x = document.getElementById("tryitcode").innerHTML.replace(/  /g, "").replace(/\t/g, "  ");
+                        document.getElementById("tryit").innerHTML = x;
+                        document.getElementById("runit").onclick = function(){
+                        	eval(x + "()");
+                        }
+                        
+                        function log(msg){
+                        	var x = document.createElement("div");
+                        	x.innerHTML = msg;
+                        	document.getElementById("log").appendChild(x);
+                        }
+                    </script>
+                </div>
+                <div>
+                    <div class = "left">
+                        <h3>API Documentation</h3>
+                        <p>
+                            Take a look at the API on <a href = "https://github.com/axemclion/jquery-indexeddb/blob/gh-pages/docs/README.md">Github Readme</a>. 
+                            You can also try out the entire API in the <a href = "/trialtool/index.html#example=/IndexedDB/jquery/demo/trialtool.html">API Playground</a>.
+                        </p>
+                        <div>
+                            <h3>Example</h3>
+                            <ul>
+                                <li>
+                                    <a href = "example/index.html" target = "_blank">Sample Application</a>
+                                </li>
+                                <li>
+                                    <a href = "https://github.com/axemclion/jquery-indexeddb/tree/gh-pages/example" target = "_blank">Source Code</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class = "right">
+                        <h3>Tests</h3>
+                        <p>
+                            Try out the test suite on your browser to see the support
+                            <br/>
+                            <a href = "test/index.html">Run the test suites now</a>
+                        </p>
+                        <p>
+                            Tested on Browsers
+                        </p>
+                        <ul>
+                            <li>
+                                Firefox 12.0 - 14.0a2 (2012-05-18)
+                            </li>
+                            <li>
+                                Chrome 18.0 - 21.0.1143.0 canary
+                            </li>
+                        </ul>
+                    </div>
+                    <div class = "clear">
+                    </div>
+                </div>
+                <h3>Other related links</h3>
+                <ul>
+                    <li>
+                        <a href = "http://nparashuram.com/IndexedDB" target = "_blank">My other IndexedDB work</a>
+                    </li>
+                    <li>
+                        <a href = "http://www.w3.org/TR/IndexedDB/" target = "_blank">IndexedDB Specification</a>
+                    </li>
+                    <li>
+                        <a href = "http://blog.nparashuram.com/search/label/indexeddb" target = "_blank">My blog posts on IndexedDB</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <div>
-            <h3>Other related links</h3>
-            <ul>
-                <li>
-                    <a href = "http://nparashuram.com/IndexedDB">My other IndexedDB work</a>
-                </li>
-                <li>
-                    <a href = "http://www.w3.org/TR/IndexedDB/">IndexedDB Specification</a>
-                </li>
-                <li>
-                    <a href = "http://blog.nparashuram.com/search/label/indexeddb">My blog posts on IndexedDB</a>
-                </li>
-            </ul>
-        </div>
-        <div>
-            <h3>Tested on Browsers</h3>
-            <ul>
-                <li>
-                    Firefox 12.0 - 14.0a2 (2012-05-18)
-                </li>
-                <li>
-                    Chrome 18.0 - 21.0.1143.0 canary
-                </li>
-            </ul>
-        </div>
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-617499-9']);
+            _gaq.push(['_setDomainName', 'github.com']);
+            _gaq.push(['_setAllowLinker', true]);
+            _gaq.push(['_trackPageview']);
+            
+            (function(){
+            	var ga = document.createElement('script');
+            	ga.type = 'text/javascript';
+            	ga.async = true;
+            	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            	var s = document.getElementsByTagName('script')[0];
+            	s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
     </body>
 </html>
