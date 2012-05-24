@@ -33,22 +33,22 @@
 						try {
 							var idbRequest = typeof req === "function" ? req(args) : req;
 							idbRequest.onsuccess = function(e){
-								//console.log("Success", idbRequest, e, this);
+								console.log("Success", idbRequest, e, this);
 								dfd.resolveWith(idbRequest, [idbRequest.result, e]);
 							};
 							idbRequest.onerror = function(e){
-								//console.log("Error", idbRequest, e, this);
+								console.log("Error", idbRequest, e, this);
 								dfd.rejectWith(idbRequest, [idbRequest.error, e]);
 							};
 							if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
 								idbRequest.onblocked = function(e){
-									//console.log("Blocked", idbRequest, e, this);
+									console.log("Blocked", idbRequest, e, this);
 									dfd.notifyWith(idbRequest, [idbRequest.result, e]);
 								};
 							}
 							if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
 								idbRequest.onupgradeneeded = function(e){
-									//console.log("Upgrade", idbRequest, e, this);
+									console.log("Upgrade", idbRequest, e, this);
 									dfd.notifyWith(idbRequest, [idbRequest.result, e]);
 								};
 							}
@@ -217,7 +217,7 @@
 					} catch (e) {
 						idbIndex = null;
 					}
-					//console.log(idbIndex, index);
+					console.log(idbIndex, index);
 					return {
 						"each": function(callback, range, direction){
 							return wrap.cursor(function(){
@@ -364,11 +364,11 @@
 			
 			// Start with opening the database
 			var dbPromise = wrap.request(function(){
-				//console.log("Trying to open DB with", version);
+				console.log("Trying to open DB with", version);
 				return version ? openReqShim(dbName, version) : openReqShim(dbName);
 			});
 			dbPromise.then(function(db, e){
-				//console.log("DB opened at", db.version);
+				console.log("DB opened at", db.version);
 				db.onversionchange = function(){
 					// Try to automatically close the database if there is a version change request
 					if (!(config && config.onversionchange && config.onversionchange() !== false)) {
@@ -376,13 +376,13 @@
 					}
 				};
 			}, function(error, e){
-				//console.log(error, e);
+				console.log(error, e);
 				// Nothing much to do if an error occurs
 			}, function(db, e){
 				if (e && e.type === "upgradeneeded") {
 					if (config && config.schema) {
 						// Assuming that version is always an integer 
-						//console.log("Upgrading DB to ", db.version);
+						console.log("Upgrading DB to ", db.version);
 						for (var i = e.oldVersion; i <= e.newVersion; i++) {
 							typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
 						}
@@ -556,10 +556,10 @@
 					result.index = function(indexName){
 						return {
 							"each": function(callback, range){
-								return indexOp("each", indexName, [callback]);
+								return indexOp("each", indexName, [callback, range]);
 							},
 							"eachKey": function(callback, range){
-								return indexOp("eachKey", indexName, [callback]);
+								return indexOp("eachKey", indexName, [callback, range]);
 							}
 						};
 					}

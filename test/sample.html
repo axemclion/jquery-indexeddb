@@ -6,7 +6,7 @@
     <body>
         <script type = "text/javascript" src="../lib/jquery.min.js">
         </script>
-        <script type = "text/javascript" src = "../jquery.indexeddb.new.js">
+        <script type = "text/javascript" src = "../jquery.indexeddb.js">
         </script>
         <script type = "text/javascript" src = "sampleData.js">
         </script>
@@ -47,19 +47,12 @@
             test();
             function test(){
             	var prev = Infinity;
-            	$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
-            		equal(prev > elem.key, true, elem.key + " is less that the previous value " + prev);
-            		prev = elem.key;
-            		start();
-            		stop();
-            	}, null, 2).then(function(){
+            	$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).index("Int").each(function(elem){
+            		console.log("Iterating on ", elem.key, elem.value);
+            	}, [20, 50]).then(function(){
             		ok(true, "Iteration complete");
-            		start();
-            		nextTest();
             	}, function(){
             		ok(false, "Iteration complete");
-            		start();
-            		nextTest();
             	});
             }
         </script>

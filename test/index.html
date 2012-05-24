@@ -322,7 +322,6 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each", function(){
-        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			ok(true, elem.key);
         			start();
@@ -340,7 +339,6 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each with range", function(){
-        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			equal(elem.key >= 1 && elem.key <= 50, true, elem.key + " is between 1 and 50");
         			_(elem);
@@ -359,7 +357,6 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each in reverse", function(){
-        	
         		var prev = Infinity;
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			equal(prev > elem.key, true, elem.key + " is less that the previous value " + prev);
@@ -378,7 +375,6 @@
         	});
         	
         	queuedAsyncTest("ObjectStore each, update and delete", function(){
-        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			if (elem.key % 3 === 0) {
         				elem["delete"]().then(function(){
@@ -420,7 +416,6 @@
         	});
         	
         	queuedAsyncTest("Skip and advance", function(){
-        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			ok(true, "Moving 2 spaces " + elem.key);
         			start();
@@ -438,7 +433,6 @@
         	});
         	
         	queuedAsyncTest("Iteration operation fails", function(){
-        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			ok(true, "Break at " + elem.key + (elem.key % 3 === 0));
         			start();
@@ -458,7 +452,6 @@
         	});
         	
         	queuedAsyncTest("Continue to next key", function(){
-        	
         		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).each(function(elem){
         			elem.next();
         			start();
@@ -476,7 +469,6 @@
         	
         	queuedModule("Indexes");
         	queuedAsyncTest("Index Iteration", function(){
-        	
         		var key = sample.integer();
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
@@ -496,8 +488,28 @@
         		});
         	});
         	
-        	queuedAsyncTest("Index iteration with keyCursor", function(){
+        	queuedAsyncTest("Index Iteration with range", function(){
+        		var key = sample.integer();
+        		var value = sample.obj();
+        		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
+        		objectStore.index("Int").each(function(elem){
+        			equal(elem.key >= 30 && elem.key <= 70, true, elem.value.Int + " is between 30 and 70");
+        			_("Iterating on " + JSON.stringify(elem.value));
+        			start();
+        			stop();
+        		}, [30, 70]).then(function(res, e){
+        			ok(true, "Index Iteration completed");
+        			start();
+        			nextTest();
+        		}, function(err, e){
+        			ok(false, "Index Iteration NOT completed");
+        			_("Index Iteration NOT completed");
+        			start();
+        			nextTest();
+        		});
+        	});
         	
+        	queuedAsyncTest("Index iteration with keyCursor", function(){
         		var key = sample.integer();
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2);
