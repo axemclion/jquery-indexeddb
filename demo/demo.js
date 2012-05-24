@@ -10,24 +10,39 @@ window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndex
 window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
 
-var schema = {
-	"1": function(versionTransaction){
-		versionTransaction.createObjectStore("BookList", {
-			"keyPath": "id",
-			"autoIncrement": true
-		});
-		versionTransaction.createObjectStore("OldBookList", {
-			"keyPath": "id",
-			"autoIncrement": true
-		});
-	},
+var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+var dbDeleteRequest = indexedDB.deleteDatabase("BookShop1");
+dbDeleteRequest.onsuccess = function(e){
 };
+
+$.indexedDB("BookShop1", {
+	"schema": {
+		1: function(versionTransaction){
+			versionTransaction.createObjectStore("OldBookList", {
+				"autoIncrement": true
+			});
+			versionTransaction.createObjectStore("TempBookList");
+		}
+	}
+});
 
 var jqueryIndexedDB_Test = {
 	"Create Object Store": {
 		"code": function(){
-			$.indexedDB("BookShop1", schema).then(console.info, console.error);
+			$.indexedDB("BookShop1", {
+				"schema": {
+					2: function(v){
+						var objectStore = v.createObjectStore("BookList", {
+							"keyPath": "id",
+							"autoIncrement": true
+						});
+						objectStore.createIndex("price");
+						console.info("Created new object store");
+					}
+				}
+			}).then(console.info, console.error);
 		},
+		
 		"alternate": function(){
 			var request = window.indexedDB.open("BookShop1");
 			request.onsuccess = function(event){
@@ -39,6 +54,7 @@ var jqueryIndexedDB_Test = {
 						"keyPath": "id",
 						"autoIncrement": true
 					});
+					objectStore.createIndex("price");
 					console.info(objectStore);
 				};
 				req.onerror = function(e){
@@ -53,7 +69,10 @@ var jqueryIndexedDB_Test = {
 	
 	"Delete Object Store": {
 		"code": function(){
-			$.indexedDB("BookShop1").deleteObjectStore("BookList", false).then(console.info, console.error);
+			$.indexedDB("BookShop1", 3).then(console.info, console.error, function(v){
+				v.deleteObjectStore("TempBookList");
+				console.info("Object Store deleted");
+			});
 		},
 		"alternate": function(){
 			var request = window.indexedDB.open("BookShop1");
@@ -62,7 +81,7 @@ var jqueryIndexedDB_Test = {
 				var req = db.setVersion((isNaN(parseInt(db.version, 10)) ? 0 : parseInt(db.version, 10) + 1));
 				req.onsuccess = function(){
 					var transaction = req.result;
-					transaction.db.deleteObjectStore("BookList");
+					transaction.db.deleteObjectStore("TempBookList");
 					console.info(transaction.db);
 				};
 				req.onerror = function(e){
@@ -77,7 +96,7 @@ var jqueryIndexedDB_Test = {
 	
 	"Transaction": {
 		"code": function(){
-			var transaction = $.indexedDB("BookShop1").transaction(["OldBookList", "BookList"], IDBTransaction.READ_WRITE);
+			var transaction = $.indexedDB("BookShop1").transaction(["OldBookList", "BookList"], $.indexedDB.IDBTransaction.READ_WRITE);
 			transaction.then(console.info, console.error);
 			transaction.progress(function(t){
 				t.objectStore("BookList").add(data()).then(console.info, console.error);
@@ -115,7 +134,7 @@ var jqueryIndexedDB_Test = {
 	
 	"Open Object Store, but dont create if does not exist": {
 		"code": function(){
-			$.indexedDB("BookShop1").objectStore("BookList", false).then(console.info, console.error);
+			$.indexedDB("BookShop1").objectStore("BookList", false);
 		},
 		"alternate": function(){
 			var request = window.indexedDB.open("BookShop1");
@@ -140,7 +159,7 @@ var jqueryIndexedDB_Test = {
 			$.indexedDB("BookShop1").objectStore("BookList", {
 				"keyPath": "id",
 				"autoIncrement": true
-			}).then(console.info, console.error);
+			});
 		},
 		"alternate": function(){
 			var request = window.indexedDB.open("BookShop1");
@@ -174,7 +193,7 @@ var jqueryIndexedDB_Test = {
 	"Add Data to Object Store": {
 		"code": function(){
 			window.book = data();
-			$.indexedDB("BookShop1").objectStore("BookList").add(book).then(function(val){
+			$.indexedDB("BookShop1").objectStore("BookList", true).add(book).then(function(val){
 				book.id = val;
 				console.info(val);
 			}, console.error);
@@ -228,7 +247,7 @@ var jqueryIndexedDB_Test = {
 	"Modify Data in Object Store": {
 		"code": function(){
 			book["modified" + Math.random()] = true;
-			$.indexedDB("BookShop1").objectStore("BookList").update(book, new Date().getTime()).then(console.info, console.error);
+			$.indexedDB("BookShop1").objectStore("BookList").put(book, new Date().getTime()).then(console.info, console.error);
 		},
 		"alternate": function(){
 			book["modified" + Math.random()] = true;
@@ -253,7 +272,7 @@ var jqueryIndexedDB_Test = {
 	
 	"Cursor and list all items in the object store": {
 		"code": function(){
-			$.indexedDB("BookShop1").objectStore("BookList").openCursor().each(console.info);
+			$.indexedDB("BookShop1").objectStore("BookList").each(console.info);
 		},
 		"alternate": function(){
 			var request = window.indexedDB.open("BookShop1");
@@ -281,9 +300,10 @@ var jqueryIndexedDB_Test = {
 	
 	"Cursor and delete items with price that is an odd number": {
 		"code": function(){
-			$.indexedDB("BookShop1").objectStore("BookList").openCursor().deleteEach(function(value, key){
-				if (value && value.price % 2) {
-					console.info("Deleting", value);
+			$.indexedDB("BookShop1").objectStore("BookList").each(function(elem){
+				if (elem.value && elem.value.price % 2) {
+					console.info("Deleting", elem.value);
+					elem["delete"]();
 					return true;
 				}
 			});
@@ -315,13 +335,13 @@ var jqueryIndexedDB_Test = {
 		}
 	},
 	
-	"Cursor and update items with price that is an odd number": {
+	"Cursor and update items with price that is an even number": {
 		"code": function(){
-			$.indexedDB("BookShop1").objectStore("BookList").openCursor().updateEach(function(value){
-				if (value && value.price % 2) {
-					value["modified-" + Math.random()] = true;
-					console.info("Updating", value);
-					return value;
+			$.indexedDB("BookShop1").objectStore("BookList").each(function(elem){
+				if (elem.value && elem.value.price % 2) {
+					console.info("Updating", elem.value);
+					elem.value["modifiedCursor-" + Math.random()] = true;
+					elem.update(elem.value);
 				}
 			});
 		},
@@ -354,7 +374,7 @@ var jqueryIndexedDB_Test = {
 	},
 	"Open an Index and iterate over its objects": {
 		"code": function(){
-			$.indexedDB("BookShop1").objectStore("BookList").index("price").openCursor().each(console.info);
+			$.indexedDB("BookShop1").objectStore("BookList").index("price").each(console.info);
 		},
 		"alternate": function(){
 			var request = window.indexedDB.open("BookShop1");
@@ -384,7 +404,7 @@ var jqueryIndexedDB_Test = {
 	
 	"Open a key cursor on an Index and iterate over its objects": {
 		"code": function(){
-			$.indexedDB("BookShop1").objectStore("BookList").index("price").openKeyCursor([200, 500]).each(console.info);
+			$.indexedDB("BookShop1").objectStore("BookList").index("price").eachKey(console.info, [200, 500]);
 		},
 		"alternate": function(){
 			var request = window.indexedDB.open("BookShop1");
