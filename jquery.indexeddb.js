@@ -266,7 +266,6 @@
 					//}, 1);
 				}
 				
-				var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 				var dbOpenReq = version ? indexedDB.open(dbName, version) : indexedDB.open(dbName);
 				var result = new IDBRequest();
 				dbOpenReq.onsuccess = function(e){
