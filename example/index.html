@@ -4,6 +4,8 @@
         <title>A self contained example for the Jquery-IndexedDB plugin</title>
         <script type = "text/javascript" src="../lib/jquery.min.js">
         </script>
+        <script type = "text/javascript" src = "/IndexedDBShim/indexeddb.shim.js">
+        </script>
         <script type = "text/javascript" src="../jquery.indexeddb.js">
         </script>
         <link href="style.css" rel="stylesheet"/>
@@ -116,9 +118,11 @@
             	}
             }).done(function(){
             	// Once the DB is opened with the object stores set up, show data from all tables
-            	loadFromDB("cart");
-            	loadFromDB("wishlist");
-            	downloadCatalog();
+            	window.setTimeout(function(){
+            		loadFromDB("cart");
+            		loadFromDB("wishlist");
+            		downloadCatalog();
+            	}, 100)
             });
             
             function deleteDB(){
@@ -131,7 +135,7 @@
             	$.getJSON("catalog.json", function(data){
             		$.indexedDB("MyECommerceSite").transaction("catalog").then(function(){
             			console.log("Transaction completed, all data inserted");
-						loadFromDB("catalog");
+            			loadFromDB("catalog");
             		}, function(err, e){
             			console.log("Transaction NOT completed", err, e);
             		}, function(transaction){
