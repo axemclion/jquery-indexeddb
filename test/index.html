@@ -40,10 +40,15 @@
         		//_("Database upgrade needed");
         	};
         	dbDeleteRequest.onerror = function(e){
-        		//_("Error deleting DB");
+        		alert("Could not delete database, but still continuing with tests");
+        		window.setTimeout(function(){
+        			startQunitTests();
+        			nextTest();
+        		}, 1000)
+        		
         	};
         	dbDeleteRequest.onblocked = function(e){
-        		//_("Deleting DB Blocked. Try closing the database and then deleting it", dbDeleteRequest.error, e.type);
+        		alert("Deleting database blocked")
         	};
         });
         
