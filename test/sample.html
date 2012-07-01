@@ -28,33 +28,17 @@
             }
         </script>
         <script type = "text/javascript">
-            var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-            /*var dbDeleteRequest = indexedDB.deleteDatabase(DB.NAME);
-             dbDeleteRequest.onsuccess = function(e){
-             _("Database successfully deleted");
-             test();
-             };
-             dbDeleteRequest.onupgradeneeded = function(e){
-             var db = dbOpenRequest.result;
-             _("Database upgrade needed");
-             };
-             dbDeleteRequest.onerror = function(e){
-             _("Error deleting DB");
-             };
-             dbDeleteRequest.onblocked = function(e){
-             _("Deleting DB Blocked. Try closing the database and then deleting it", dbDeleteRequest.error, e.type);
-             };*/
-            test();
-            function test(){
-            	var prev = Infinity;
-            	$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).index("Int").each(function(elem){
-            		console.log("Iterating on ", elem.key, elem.value);
-            	}, [20, 50]).then(function(){
-            		ok(true, "Iteration complete");
-            	}, function(){
-            		ok(false, "Iteration complete");
-            	});
-            }
+            $.indexedDB("SomeDatabase", {
+            	"schema": {
+            		"1": function(versionTransaction){
+            			console.log("Running update 1");
+            			var objectStore2 = versionTransaction.createObjectStore("b", {
+            				"keyPath": "id",
+            				"autoIncrement": true
+            			});
+            		}
+            	}
+            });
         </script>
     </body>
 </html>

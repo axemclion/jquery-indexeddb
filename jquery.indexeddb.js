@@ -272,10 +272,10 @@
 					copyReq();
 					var db = dbOpenReq.result;
 					if (typeof db.setVersion === "function") {
-						var oldVersion = parseInt(db.version || 1, 10);
-						var newVersion = typeof version === "undefined" ? oldVersion : parseInt(version, 10);
+						var oldVersion = parseInt(db.version || 0, 10);
+						var newVersion = typeof version === "undefined" ? (oldVersion === 0 ? 1 : oldVersion) : parseInt(version, 10);
 						if (oldVersion < newVersion) {
-							var versionReq = db.setVersion(version);
+							var versionReq = db.setVersion(newVersion);
 							versionReq.onsuccess = function(upgradeEvent){
 								result.transaction = versionReq.result;
 								var event = new Event("upgradeneeded");
