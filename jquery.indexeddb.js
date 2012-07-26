@@ -554,8 +554,8 @@
 					
 					result.index = function(indexName){
 						return {
-							"each": function(callback, range){
-								return indexOp("each", indexName, [callback, range]);
+							"each": function(callback, range, direction){
+								return indexOp("each", indexName, [callback, range, direction]);
 							},
 							"eachKey": function(callback, range){
 								return indexOp("eachKey", indexName, [callback, range]);
