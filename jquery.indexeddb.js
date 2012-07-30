@@ -557,8 +557,8 @@
 							"each": function(callback, range, direction){
 								return indexOp("each", indexName, [callback, range, direction]);
 							},
-							"eachKey": function(callback, range){
-								return indexOp("eachKey", indexName, [callback, range]);
+							"eachKey": function(callback, range, direction){
+								return indexOp("eachKey", indexName, [callback, range, direction]);
 							}
 						};
 					}

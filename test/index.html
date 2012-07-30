@@ -151,7 +151,6 @@
         	});
         	
         	queuedAsyncTest("Open a lower version schema", function(){
-        	
         		$.indexedDB(DB.NAME, 1).then(function(res, e){
         			ok(false, "Should not have opened as DB was lower version");
         			_("Should not have opened as DB was lower version");
@@ -220,6 +219,7 @@
         			ok(true, "Added " + res + " to the database");
         			_("Added" + res + "to the database ");
         			start();
+        			stop();
         			$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).get(res).then(function(val){
         				deepEqual(val, value, "Value of the returned object " + val);
         				_("Got object using" + res + " key");
@@ -386,12 +386,12 @@
         					ok(true, "Object Deleted " + elem.key);
         					_("Object Deleted");
         					start();
-        					nextTest();
+        					stop();
         				}, function(){
         					ok(false, "Object NOT Deleted " + elem.key);
         					_("Object NOT Deleted");
         					start();
-        					nextTest();
+        					stop();
         				});
         			} else {
         				var val = elem.value;
@@ -400,12 +400,12 @@
         					ok(true, "Object updated " + elem.key);
         					_("Object updated");
         					start();
-        					nextTest();
+        					stop();
         				}, function(){
         					ok(false, "Object NOT updated " + elem.key);
         					_("Object NOT updated");
         					start();
-        					nextTest();
+        					stop();
         				});
         			}
         			ok(true, "Looking at " + elem.key);
@@ -414,9 +414,11 @@
         		}).then(function(){
         			ok(true, "Iteration complete success");
         			start();
+        			nextTest();
         		}, function(){
         			ok(false, "Iteration complete failure");
         			start();
+        			nextTest();
         		});
         	});
         	
@@ -498,11 +500,34 @@
         		var value = sample.obj();
         		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
         		objectStore.index("Int").each(function(elem){
-        			equal(elem.key >= 30 && elem.key <= 70, true, elem.value.Int + " is between 30 and 70");
+        			equal(elem.key >= 10 && elem.key <= 90, true, elem.value.Int + " is between 10 and 90");
         			_("Iterating on " + JSON.stringify(elem.value));
         			start();
         			stop();
-        		}, [30, 70]).then(function(res, e){
+        		}, [10, 90]).then(function(res, e){
+        			ok(true, "Index Iteration completed");
+        			start();
+        			nextTest();
+        		}, function(err, e){
+        			ok(false, "Index Iteration NOT completed");
+        			_("Index Iteration NOT completed");
+        			start();
+        			nextTest();
+        		});
+        	});
+        	
+        	queuedAsyncTest("Index Iteration with range, reverse", function(){
+        		var key = sample.integer();
+        		var value = sample.obj();
+        		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
+        		var prev = Infinity;
+        		objectStore.index("Int").each(function(elem){
+        			equal(prev > elem.key, true, elem.key + " is less that the previous value and in range " + prev);
+        			prev = elem.key;
+        			_("Iterating on " + JSON.stringify(elem.value));
+        			start();
+        			stop();
+        		}, [10, 90], $.indexedDB.IDBCursor.PREV).then(function(res, e){
         			ok(true, "Index Iteration completed");
         			start();
         			nextTest();
@@ -517,12 +542,34 @@
         	queuedAsyncTest("Index iteration with keyCursor", function(){
         		var key = sample.integer();
         		var value = sample.obj();
-        		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_2);
-        		objectStore.index(DB.INDEX1_ON_OBJECT_STORE_2).eachKey(function(elem){
+        		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
+        		objectStore.index("Int").eachKey(function(elem){
         			ok(true, "Iterating on " + elem.key + ":" + elem.value);
         			start();
         			stop();
         		}).then(function(res, e){
+        			ok(true, "Index Iteration completed");
+        			start();
+        			nextTest();
+        		}, function(err, e){
+        			ok(false, "Index Iteration NOT completed");
+        			_("Index Iteration NOT completed");
+        			start();
+        			nextTest();
+        		});
+        	});
+        	
+        	queuedAsyncTest("Index iteration with keyCursor and range, reverse", function(){
+        		var key = sample.integer();
+        		var value = sample.obj();
+        		var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
+        		var prev = Infinity;
+        		objectStore.index("Int").eachKey(function(elem){
+        			equal(prev > elem.key, true, elem.key + " is less that the previous value " + prev);
+        			prev = elem.key
+        			start();
+        			stop();
+        		}, [10, 90], $.indexedDB.IDBCursor.PREV).then(function(res, e){
         			ok(true, "Index Iteration completed");
         			start();
         			nextTest();
@@ -564,7 +611,6 @@
         	});
         	
         	queuedAsyncTest("Simple transaction with mode", function(){
-        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3], $.indexedDB.IDBTransaction.READ_WRITE).then(function(e){
         			equal(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -582,7 +628,6 @@
         	});
         	
         	queuedAsyncTest("Aborted transaction", function(){
-        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			notEqual(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -605,7 +650,6 @@
         	});
         	
         	queuedAsyncTest("Transaction with non-existant object store", function(){
-        	
         		$.indexedDB(DB.NAME).transaction(["Error ", DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			notEqual(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -620,7 +664,6 @@
         	});
         	
         	queuedAsyncTest("Transaction aborts due to exception when in progress", function(){
-        	
         		$.indexedDB(DB.NAME).transaction([DB.OBJECT_STORE_1, DB.OBJECT_STORE_2, DB.OBJECT_STORE_3]).then(function(e){
         			notEqual(e.type, "complete", "Transaction completed successfully");
         			start();
@@ -637,7 +680,6 @@
         	});
         	
         	queuedAsyncTest("Multiple object store ops", function(){
-        	
         		var testCount = 0;
         		for (var i = 0; i < 10; i++) {
         			(function(mode, count){
@@ -681,7 +723,6 @@
         	});
         	
         	queuedAsyncTest("Multiple transactions at same time", function(){
-        	
         		var testCount = 0;
         		for (var i = 0; i < 10; i++) {
         			(function(mode, count){
@@ -705,14 +746,20 @@
         							transaction.objectStore(DB.OBJECT_STORE_1).add(sample.obj(), count).then(function(res, e){
         								_(count + "> Added to Object Store 1: " + mode);
         								ok(true, count + "> Added to Object Store 1: " + mode);
+        								start();
+        								stop();
         							}, function(err, e){
         								_(count + "> Could not add to Object Store 1: " + mode);
         								ok(false, count + "> Could not add in transaction to Object Store 1: " + mode);
+        								start();
+        								stop();
         							});
         						} else {
         							transaction.objectStore(DB.OBJECT_STORE_1).each(function(elem){
         								_(count + "> Reading " + elem.key);
         								ok(true, count + "> Reading " + elem.key);
+        								start();
+        								stop();
         								return false;
         							});
         						}
