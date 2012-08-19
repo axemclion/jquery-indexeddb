@@ -382,7 +382,7 @@
 					if (config && config.schema) {
 						// Assuming that version is always an integer 
 						//console.log"Upgrading DB to ", db.version);
-						for (var i = e.oldVersion; i <= e.newVersion; i++) {
+						for (var i = e.oldVersion + 1; i <= e.newVersion; i++) {
 							typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
 						}
 					}
