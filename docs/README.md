@@ -132,7 +132,7 @@ The following 2 methods are available only when the database is being upgraded. 
 var objectStore = trans.createObjectStore("objectStoreName", {
 	// Options to create object store. 
 	"autoIncrement" : true,  // [detaults to true], indicating that the key for this object store should auto increment,
-	"keypath" : id // the path of key in the object, defaults to key that has to be specified separately
+	"keyPath" : id // the path of key in the object, defaults to key that has to be specified separately
 }); 
 
 trans.deleteObjectStore(objectStoreName); 
