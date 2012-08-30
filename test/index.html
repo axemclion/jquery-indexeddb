@@ -79,16 +79,16 @@
         	
         		$.indexedDB(DB.NAME, {
         			"schema": {
-        				"1": function(versionTransaction){
-        					_("Running update 1");
+        				"2": function(versionTransaction){
+        					_("Running update 2");
         					var objectStore1 = versionTransaction.createObjectStore(DB.OBJECT_STORE_1);
         					objectStore1.add(sample.obj(), sample.integer());
         					objectStore1.add(sample.obj(), sample.integer());
         					objectStore1.add(sample.obj(), sample.integer());
         					versionTransaction.createObjectStore(DB.OBJECT_STORE_3);
         				},
-        				"2": function(versionTransaction){
-        					_("Running update 2");
+        				"3": function(versionTransaction){
+        					_("Running update 3");
         					var objectStore2 = versionTransaction.createObjectStore(DB.OBJECT_STORE_2, {
         						"keyPath": "id",
         						"autoIncrement": true
@@ -99,8 +99,8 @@
         					 });*/
         					versionTransaction.objectStore(DB.OBJECT_STORE_1).createIndex("Int");
         				},
-        				"3": function(versionTransaction){
-        					_("Running update 3");
+        				"4": function(versionTransaction){
+        					_("Running update 4");
         					versionTransaction.deleteObjectStore(DB.OBJECT_STORE_3);
         					versionTransaction.objectStore(DB.OBJECT_STORE_2).createIndex("Number", DB.INDEX1_ON_OBJECT_STORE_2);
         				}
@@ -125,9 +125,8 @@
         	});
         	
         	queuedAsyncTest("DB with upgrade defination", function(){
-        	
         		$.indexedDB(DB.NAME, {
-        			"version": 4,
+        			"version": 5,
         			"upgrade": function(versionTransaction){
         				_("Upgrade method called");
         				var objectStore3 = versionTransaction.createObjectStore(DB.OBJECT_STORE_3);
