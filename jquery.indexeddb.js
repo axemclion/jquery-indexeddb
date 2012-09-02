@@ -43,7 +43,12 @@
 							if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
 								idbRequest.onblocked = function(e){
 									//console.log"Blocked", idbRequest, e, this);
-									dfd.notifyWith(idbRequest, [idbRequest.result, e]);
+									try {
+										var res = idbRequest.result;
+									} catch (e) {
+										res = null; // Required for Older Chrome versions, accessing result causes error 
+									}
+									dfd.notifyWith(idbRequest, [res, e]);
 								};
 							}
 							if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
