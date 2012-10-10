@@ -9,6 +9,7 @@
         <script type = "text/javascript" src="../jquery.indexeddb.js">
         </script>
         <link href="style.css" rel="stylesheet"/>
+        <meta charset="UTF-8">
     </head>
     <body>
         <div>
@@ -24,12 +25,15 @@
                 <div class = "controls">
                     <h2>Catalog</h2>
                     <a href = "javascript:loadFromDB('catalog')">Load from Local DB</a>
-                    <a href = "javascript:downloadCatalog();">Save from Server TO DB</a>
+                    <a href = "javascript:downloadCatalog();">Sync to DB</a>
                 </div>
                 <table id = "catalog" width="400">
                     <tr>
                         <th class = "header key">
                             Id
+                        </th>
+                        <th class = "header actions">
+                            Actions
                         </th>
                         <th class = "header value action">
                             Object
@@ -37,9 +41,6 @@
                                 <a href = "javascript:loadFromDB('catalog')">Show all</a>
                                 <a href = "javascript:sort('catalog', 'price')">Sort by Price</a>
                             </div>
-                        </th>
-                        <th class = "header actions">
-                            Actions
                         </th>
                     </tr>
                 </table>
@@ -56,14 +57,14 @@
                             Id
                         </th>
                         <th>
+                            Actions
+                        </th>
+                        <th>
                             Object
                             <div class = "action" style ="float:right; width : 200px">
                                 <a href = "javascript:loadFromDB('cart')">Show all</a>
                                 <a href = "javascript:sort('cart', 'itemId')">Sort by ItemId</a>
                             </div>
-                        </th>
-                        <th>
-                            Actions
                         </th>
                     </tr>
                 </table>
@@ -80,10 +81,10 @@
                             Id
                         </th>
                         <th>
-                            Object
+                            Actions
                         </th>
                         <th>
-                            Actions
+                            Object
                         </th>
                     </tr>
                 </table>
@@ -122,7 +123,7 @@
             		loadFromDB("cart");
             		loadFromDB("wishlist");
             		downloadCatalog();
-            	}, 100)
+            	}, 200);
             });
             
             function deleteDB(){
@@ -251,24 +252,35 @@
             	var row = document.createElement("tr");
             	var html = ["<tr>"];
             	html = html.concat(["<td class = 'key'>", key, "</td>"]);
-            	html = html.concat(["<td class = 'value'>", JSON.stringify(value).replace(/,/g, ",\n"), "</td>"]);
             	html.push("<td class = 'action'>");
             	for (var action in actions[tableName]) {
             		html = html.concat("<a href = 'javascript:", actions[tableName][action], "(", key, ")'>", action, "</a>");
             	}
             	html.push("</td>");
+				html = html.concat(["<td class = 'value'>", renderJSON(value), "</td>"]);
             	html.push("</tr>");
             	row.innerHTML = html.join("");
             	table.appendChild(row);
+            }
+            
+            function renderJSON(val){
+            	var result = [];
+            	for (var key in val) {
+            		result.push("<div class = 'keyval'>");
+            		result.push("<span class = 'key'>", key, "</span>");
+            		result.push("<span class = 'value'>", JSON.stringify(val[key]), "</span>");
+            		result.push("</div>")
+            	}
+            	return result.join("");
             }
             
             function _(promise){
             	promise.then(function(a, e){
             		console.log("Action completed", e.type, a, e);
             	}, function(a, e){
-            		console.log("Action completed", e.type, a, e);
+            		console.log("Action completed", a, e);
             	}, function(a, e){
-            		console.log("Action completed", e.type, a, e);
+            		console.log("Action completed", a, e);
             	})
             }
         </script>

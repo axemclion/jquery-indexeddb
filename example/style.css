@@ -63,7 +63,6 @@ table th {
 	background-image: -ms-linear-gradient(top, #eeeeee, #cccccc);
 	background-image: -o-linear-gradient(top, #eeeeee, #cccccc);
 	background-image: linear-gradient(top, #eeeeee, #cccccc);
-
 }
 
 table td.key, th.key {
@@ -75,9 +74,52 @@ table td.value {
     text-align: left;
 }
 
+table td.value div.keyval{
+	display: inline-block;
+	padding : 5px;
+}
+
+@media screen and (max-width: 500px) { 
+	table td.value div.keyval{
+		display: block;
+		padding : 1px;
+		width: 100%;
+		text-overflow : ellipsis;
+	}
+}
+
+table td.value div.keyval:after{
+	content: ",";
+}
+
+table td.value div.keyval span.key{
+	color: #333;
+}
+
+table td.value div.keyval span.key:after{
+	content : ":";
+}
+
+table td.value div.keyval span.value{
+	color: #777;
+}
+
+
 table td.action {
     width: 20%;
+	min-width: 100px;
 }
+
+@media screen and (max-width: 1098px) { 
+	table td.action a{
+   		display: block;
+		width: 80px;
+		margin: 5px auto;
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+}
+
 
 #console {
     clear: both;
@@ -134,6 +176,7 @@ table td.action {
 .action  a {
     vertical-align: middle;
     margin: 0 1%;
+	line-height: 15px;
 }
 
 .action a{
