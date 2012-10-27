@@ -242,6 +242,12 @@
 									return idbIndex.openKeyCursor(wrap.range(range));
 								}
 							}, callback);
+						},
+						"get": function(key){
+							console.log(idbIndex);
+							return wrap.request(
+								idbIndex.get(key)
+							);
 						}
 					};
 				}
@@ -425,7 +431,7 @@
 				},
 				"transaction": function(storeNames, mode){
 					!$.isArray(storeNames) && (storeNames = [storeNames]);
-					mode = mode || IDBTransaction.READ_WRITE;
+					mode = (mode === "readwrite" || mode === "readonly") ? mode : "readwrite";
 					return $.Deferred(function(dfd){
 						dbPromise.then(function(db, e){
 							try {
@@ -478,7 +484,7 @@
 									dfd.rejectWith(trans, [e, e]);
 								}
 							}
-							me.transaction(storeName, typeof mode === "number" ? mode : IDBTransaction.READ_WRITE).then(function(){
+							me.transaction(storeName, (mode === "readwrite" || mode === "readonly") ? mode : "readwrite").then(function(){
 								//console.log"Transaction completed");
 								// Nothing to do when transaction is complete
 							}, function(err, e){
@@ -499,7 +505,7 @@
 												db.close();
 											}
 										};
-										me.transaction(storeName, typeof mode === "number" ? mode : IDBTransaction.READ_WRITE).then(function(){
+										me.transaction(storeName, (mode === "readwrite" || mode === "readonly") ? mode : "readwrite").then(function(){
 											//console.log"Transaction completed when trying to create object store");
 											// Nothing much to do
 										}, function(err, e){
@@ -564,6 +570,9 @@
 							},
 							"eachKey": function(callback, range, direction){
 								return indexOp("eachKey", indexName, [callback, range, direction]);
+							},
+							"get": function(key) {
+								return indexOp("get", indexName, [key]);
 							}
 						};
 					}
