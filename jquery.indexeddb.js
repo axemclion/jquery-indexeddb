@@ -242,6 +242,12 @@
 									return idbIndex.openKeyCursor(wrap.range(range));
 								}
 							}, callback);
+						},
+						"get": function(key){
+							console.log(idbIndex);
+							return wrap.request(
+								idbIndex.get(key)
+							);
 						}
 					};
 				}
@@ -564,6 +570,9 @@
 							},
 							"eachKey": function(callback, range, direction){
 								return indexOp("eachKey", indexName, [callback, range, direction]);
+							},
+							"get": function(key) {
+								return indexOp("get", indexName, [key]);
 							}
 						};
 					}
