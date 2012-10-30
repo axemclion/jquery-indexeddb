@@ -538,6 +538,62 @@
         		});
         	});
         	
+        	queuedAsyncTest("Getting index values with key", function(){
+        		var key = sample.integer();
+        		var value = sample.obj();
+        		_("Trying to add" + key + " and " + JSON.stringify(value));
+        		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(value, key).then(function(res, e){
+        			ok(true, "Added " + res + " to the database");
+        			_("Added" + res + "to the database ");
+        			start();
+        			stop();
+        			$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).index("Int").get(value.Int).then(function(res, e){
+        				deepEqual(res, value);
+        				_("Got return value as" + res);
+        				start();
+        				nextTest();
+        			}, function(err, e){
+        				ok(false, "Index Iteration NOT completed");
+        				_("Index Iteration NOT completed");
+        				start();
+        				nextTest();
+        			});
+        		}, function(){
+        			ok(false, "Could not add value to the database");
+        			_("Could not add to database");
+        			start();
+        			nextTest();
+        		});
+        	});
+        	
+        	queuedAsyncTest("Getting index-key values with key", function(){
+        		var key = sample.integer();
+        		var value = sample.obj();
+        		_("Trying to add" + key + " and " + JSON.stringify(value));
+        		$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).add(value, key).then(function(res, e){
+        			ok(true, "Added " + res + " to the database");
+        			_("Added" + res + "to the database ");
+        			start();
+        			stop();
+        			$.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1).index("Int").getKey(value.Int).then(function(res, e){
+        				_("Got return value as" + res);
+        				equal(key, res);
+        				start();
+        				nextTest();
+        			}, function(err, e){
+        				ok(false, "Index Iteration NOT completed");
+        				_("Index Iteration NOT completed");
+        				start();
+        				nextTest();
+        			});
+        		}, function(){
+        			ok(false, "Could not add value to the database");
+        			_("Could not add to database");
+        			start();
+        			nextTest();
+        		});
+        	});
+        	
         	queuedAsyncTest("Index iteration with keyCursor", function(){
         		var key = sample.integer();
         		var value = sample.obj();

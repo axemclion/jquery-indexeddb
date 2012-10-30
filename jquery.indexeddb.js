@@ -244,10 +244,18 @@
 							}, callback);
 						},
 						"get": function(key){
-							console.log(idbIndex);
-							return wrap.request(
-								idbIndex.get(key)
-							);
+							if (typeof idbIndex.get === "function") {
+								return wrap.request(idbIndex.get(key));
+							} else {
+								return idbIndex.openCursor(wrap.range(key));
+							}
+						},
+						"getKey": function(key){
+							if (typeof idbIndex.getKey === "function") {
+								return wrap.request(idbIndex.getKey(key));
+							} else {
+								return idbIndex.openKeyCursor(wrap.range(key));
+							}
 						}
 					};
 				}
@@ -571,8 +579,11 @@
 							"eachKey": function(callback, range, direction){
 								return indexOp("eachKey", indexName, [callback, range, direction]);
 							},
-							"get": function(key) {
+							"get": function(key){
 								return indexOp("get", indexName, [key]);
+							},
+							"getKey": function(key){
+								return indexOp("getKey", indexName, [key]);
 							}
 						};
 					}
