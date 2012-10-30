@@ -1,4 +1,29 @@
 (function($, undefined){
+	var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+	var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
+	var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
+	
+	/**
+	 * Best to use the constant IDBTransaction since older version support numeric types while the latest spec
+	 * supports strings
+	 */
+	var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
+	
+	function getDefaultTransaction(mode){
+		var result = null;
+		switch (mode) {
+			case 0:
+			case 1:
+			case "readwrite":
+			case "readonly":
+				result = mode;
+				break;
+			default:
+				result = IDBTransaction.READ_WRITE;
+		}
+		return result;
+	}
+	
 	$.extend({
 		/**
 		 * The IndexedDB object used to open databases
@@ -6,10 +31,6 @@
 		 * @param {Object} config - version, onupgradeneeded, onversionchange, schema
 		 */
 		"indexedDB": function(dbName, config){
-			var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-			var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
-			var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-			
 			if (config) {
 				// Parse the config argument
 				if (typeof config === "number") config = {
@@ -439,7 +460,7 @@
 				},
 				"transaction": function(storeNames, mode){
 					!$.isArray(storeNames) && (storeNames = [storeNames]);
-					mode = mode || IDBTransaction.READ_WRITE;
+					mode = getDefaultTransaction(mode);
 					return $.Deferred(function(dfd){
 						dbPromise.then(function(db, e){
 							try {
@@ -492,7 +513,7 @@
 									dfd.rejectWith(trans, [e, e]);
 								}
 							}
-							me.transaction(storeName, typeof mode === "number" ? mode : IDBTransaction.READ_WRITE).then(function(){
+							me.transaction(storeName, getDefaultTransaction(mode)).then(function(){
 								//console.log"Transaction completed");
 								// Nothing to do when transaction is complete
 							}, function(err, e){
@@ -513,7 +534,7 @@
 												db.close();
 											}
 										};
-										me.transaction(storeName, typeof mode === "number" ? mode : IDBTransaction.READ_WRITE).then(function(){
+										me.transaction(storeName, getDefaultTransaction(mode)).then(function(){
 											//console.log"Transaction completed when trying to create object store");
 											// Nothing much to do
 										}, function(err, e){
@@ -594,7 +615,7 @@
 		}
 	});
 	
-	$.indexedDB.IDBCursor = window.IDBCursor || window.webkitIDBCursor;
-	$.indexedDB.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-	
+	$.indexedDB.IDBCursor = IDBCursor;
+	$.indexedDB.IDBTransaction = IDBTransaction;
+	$.idb = $.indexedDB;
 })(jQuery);
