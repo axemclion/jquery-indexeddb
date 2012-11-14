@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+   - 0.8
+notifications:
+    email: false
+    
+env:
+    global:
+      - secure: "B7pAZwdmje6ZzZNF6KZzmG0YfWAcr+yMB0GE2Dv4PWQXqhbfCV9MtzHXGWjR\nlWfIl4+iUEABvtqm7YUKfG9XRx6qMF1WViDNToRXZWBn+ntDE70RnsN8SaIp\nV8qGPOR4lSf7a0d8kmnGTgJONc778LEqbHGL2csgJtMX3D70PlQ="
+      - secure: "Na8Ro6OJrTuxLJjnQuBPz1+Rfsub7cH7d5MyBUE08lfU0JQYhRwTK6gNV9Hq\nSrOm9vygY6EKExbp/1gBL+nS0PkJj6dKbTGPCbNlGXdWI78giF769UQNww+O\nujbppzUZfaWcxHw/tSQojB1QOJXnLfLInC9WCkO0P/YL00hFwZ4="

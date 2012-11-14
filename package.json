@@ -1,26 +1,30 @@
 {
-	"name" : "indexeddb",
-	"version" : 1.0,
-	"title" : "IndexedDB API Plugin",
-	"description" : "An easy to use Jquery API over the HTML5 IndexedDB API with smart defaults and support for promises, ",
-	"keywords" : "IndexedDB, storage, database, data",
-	"homepage" : "http://nparashuram.com/jquery-indexeddb/",
-	"docs" : "https://github.com/axemclion/jquery-indexeddb/blob/gh-pages/docs/README.md",
-	"demo" : "http://nparashuram.com/jquery-indexeddb/example/index.html",
-	"files" : "jquery.indexeddb.js"	
-	"author" : {
-		"name" : "Parashuram Narasimhan",
-		"email" : "contact@nparashuram.com",
-		"url" : "http://nparashuram.com"
-	},
-	"licenses": [{
-       	"type": "GPLv2",
-       	"url": "http://www.gnu.org/copyleft/gpl.html"
-   	}, 	{
-		"type" : "Apache License, Version 2.0",
-		"url" : "http://www.apache.org/licenses/LICENSE-2.0"
-	}],
-	"dependencies" : {
-		"jquery" : ">=1.5.x"
-	}
+    "name": "jquery-indexeddb",
+    "preferGlobal": "false",
+    "version": "0.1.0",
+    "author": "Parashuram <code@nparashuram.com>",
+    "description": "A Jquery plugin for the IndexedDB API",
+    "scripts": {
+        "start": "grunt",
+        "test": "grunt test"
+    },
+    "repository": {
+        "type": "git",
+	    "url": "git://github.com/axemclion/jquery-indexeddb.git"
+    },
+	"bugs": {
+    	"url": "https://github.com/axemclion/jquery-indexeddb/issues"
+  	},
+	"main": "grunt.js",
+    "keywords": ["indexedDB", "database", "jquery"],
+    "devDependencies": {
+        "grunt": "~0.3.12",
+        "grunt-saucelabs-qunit": "*",
+		"request" : "*"
+    },
+    "bundleDependencies": [],
+    "license": "MIT",
+    "engines": {
+        "node": ">=0.6"
+    }
 }
