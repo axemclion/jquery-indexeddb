@@ -18,13 +18,12 @@ var sample = (function() {
 				"Int" : this.integer(),
 				"Float" : Math.random(),
 				"Boolean" : true
-			}
+			};
 		},
 		integer : function(arg) {
 			var res;
 			do {
-				console.log("Inside the loop")
-				res = parseInt(Math.random() * (arg || 1000));
+				res = parseInt(Math.random() * (arg || 1000), 10);
 			} while (takenValues[res]);
 			takenValues[res] = true;
 			return res;

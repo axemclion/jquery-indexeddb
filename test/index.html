@@ -40,7 +40,7 @@
         		//_("Database upgrade needed");
         	};
         	dbDeleteRequest.onerror = function(e){
-        		alert("Could not delete database, but still continuing with tests");
+        		console.log("Could not delete database, but still continuing with tests");
         		window.setTimeout(function(){
         			startQunitTests();
         			nextTest();
@@ -48,7 +48,7 @@
         		
         	};
         	dbDeleteRequest.onblocked = function(e){
-        		alert("Deleting database blocked")
+        		console.log("Deleting database blocked")
         	};
         });
         
