@@ -31,8 +31,6 @@ module.exports = function(grunt){
 				tags: ['master'],
 				urls: ['http://127.0.0.1:9999/test/index.html'],
 				browsers: [{
-					browserName: 'firefox'
-				}, {
 					browserName: 'chrome'
 				}]
 			}
