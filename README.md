@@ -1,5 +1,5 @@
-Jquery Plugin for the IndexedDB API
-===================================
+Jquery Plugin for the IndexedDB API [![Build Status](https://secure.travis-ci.org/axemclion/jquery-indexeddb.png?branch=master)](https://travis-ci.org/axemclion/jquery-indexeddb)
+===============================================================================================================================================================================
 
 IndexedDB is a database inside a browser to save and retrieve objects on the browser/client. The JQuery IndexedDB Plugin is a wrapper on the IndexedDB API for JQuery. 
 
