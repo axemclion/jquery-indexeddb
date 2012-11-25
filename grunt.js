@@ -114,14 +114,13 @@ module.exports = function(grunt){
 	});
 	
 	var testJobs = ["build", "server"];
-	if (saucekey !== null) {
-		testJobs.push("saucelabs-qunit");
-	}
 	if (process.env.CI && process.env.TRAVIS) {
+		if (saucekey !== null) {
+			testJobs.push("saucelabs-qunit");
+		}
 		testJobs.push("publish");
 	}
 	
 	grunt.registerTask('test', testJobs.join(" "));
-	
 	grunt.registerTask('default', 'build');
 };
