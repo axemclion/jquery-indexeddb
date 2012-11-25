@@ -86,6 +86,9 @@ module.exports = function(grunt){
 	// Default task.
 	grunt.loadNpmTasks('grunt-saucelabs-qunit');
 	grunt.registerTask('build', 'lint');
+	grunt.registerTask("forever", function(){
+		this.async();
+	});
 	
 	grunt.registerTask("publish", function(){
 		var done = this.async();
