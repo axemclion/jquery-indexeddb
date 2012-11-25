@@ -3,7 +3,7 @@
 	var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 	var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
 	IDBCursor.PREV = IDBCursor.PREV || "prev";
-	IDBCursor.NEXT = IDBCursor.PREV || "next";
+	IDBCursor.NEXT = IDBCursor.NEXT || "next";
 	
 	/**
 	 * Best to use the constant IDBTransaction since older version support numeric types while the latest spec
@@ -66,8 +66,9 @@
 							if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
 								idbRequest.onblocked = function(e){
 									console.log("Blocked", idbRequest, e, this);
+									var res;
 									try {
-										var res = idbRequest.result;
+										res = idbRequest.result;
 									} catch (e) {
 										res = null; // Required for Older Chrome versions, accessing result causes error 
 									}
@@ -126,7 +127,7 @@
 								return wrap.request(function(args){
 									return idbObjectStore[op].apply(idbObjectStore, args);
 								}, arguments);
-							}
+							};
 						})(crudOps[i]);
 					}
 					
@@ -148,7 +149,7 @@
 					
 					result.createIndex = function(prop, options, indexName){
 						if (arguments.length === 2 && typeof options === "string") {
-							indexName = arguments[1]
+							indexName = arguments[1];
 							options = null;
 						}
 						if (!indexName) {
@@ -161,7 +162,7 @@
 					
 					result.deleteIndex = function(indexName){
 						return idbObjectStore.deleteIndex(indexName);
-					}
+					};
 					
 					return result;
 				},
@@ -232,7 +233,7 @@
 								dfd.rejectWith(cursorReq, [cursorReq.result, e]);
 							};
 						} catch (e) {
-							console.log("An exception occured inside cursor", cursorReq, e)
+							console.log("An exception occured inside cursor", cursorReq, e);
 							e.type = "exception";
 							dfd.rejectWith(cursorReq, [null, e]);
 						}
@@ -282,7 +283,7 @@
 						}
 					};
 				}
-			}
+			};
 			
 			////////////////////////////////////////////////////////////////////////////////////////////////////
 			
@@ -397,7 +398,7 @@
 				};
 				
 				return result;
-			}
+			};
 			
 			
 			////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -465,9 +466,10 @@
 					mode = getDefaultTransaction(mode);
 					return $.Deferred(function(dfd){
 						dbPromise.then(function(db, e){
+							var idbTransaction;
 							try {
 								console.log("DB Opened, now trying to create a transaction", storeNames, mode);
-								var idbTransaction = db.transaction(storeNames, mode);
+								idbTransaction = db.transaction(storeNames, mode);
 								console.log("Created a transaction", idbTransaction, mode, storeNames);
 								idbTransaction.onabort = idbTransaction.onerror = function(e){
 									dfd.rejectWith(idbTransaction, [e]);
@@ -556,7 +558,7 @@
 												} : mode);
 												console.log("Object store created", storeName, db);
 											} catch (ex) {
-												console.log("Exception when trying ot create a new object store", ex)
+												console.log("Exception when trying ot create a new object store", ex);
 												dfd.rejectWith(this, [ex, e]);
 											}
 										}
@@ -570,7 +572,7 @@
 								onTransactionProgress(trans, callback);
 							});
 						});
-					};
+					}
 					
 					function crudOp(opName, args){
 						return op(function(wrappedObjectStore){
@@ -590,7 +592,7 @@
 						result[crud[i]] = (function(op){
 							return function(){
 								return crudOp(op, arguments);
-							}
+							};
 						})(crud[i]);
 					}
 					
@@ -609,7 +611,7 @@
 								return indexOp("getKey", indexName, [key]);
 							}
 						};
-					}
+					};
 					
 					return result;
 				}
