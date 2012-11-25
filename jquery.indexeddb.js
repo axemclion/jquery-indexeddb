@@ -3,14 +3,14 @@
 	var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 	var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
 	IDBCursor.PREV = IDBCursor.PREV || "prev";
-	IDBCursor.NEXT = IDBCursor.NEXT || "next";
-
+	IDBCursor.NEXT = IDBCursor.PREV || "next";
+	
 	/**
 	 * Best to use the constant IDBTransaction since older version support numeric types while the latest spec
 	 * supports strings
 	 */
 	var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-
+	
 	function getDefaultTransaction(mode){
 		var result = null;
 		switch (mode) {
@@ -25,7 +25,7 @@
 		}
 		return result;
 	}
-
+	
 	$.extend({
 		/**
 		 * The IndexedDB object used to open databases
@@ -38,7 +38,7 @@
 				if (typeof config === "number") config = {
 					"version": config
 				};
-
+				
 				var version = config.version;
 				if (config.schema && !version) {
 					var max = -1;
@@ -48,8 +48,8 @@
 					version = config.version || max;
 				}
 			}
-
-
+			
+			
 			var wrap = {
 				"request": function(req, args){
 					return $.Deferred(function(dfd){
@@ -69,7 +69,7 @@
 									try {
 										var res = idbRequest.result;
 									} catch (e) {
-										res = null; // Required for Older Chrome versions, accessing result causes error
+										res = null; // Required for Older Chrome versions, accessing result causes error 
 									}
 									dfd.notifyWith(idbRequest, [res, e]);
 								};
@@ -129,7 +129,7 @@
 							}
 						})(crudOps[i]);
 					}
-
+					
 					result.each = function(callback, range, direction){
 						return wrap.cursor(function(){
 							if (direction) {
@@ -139,13 +139,13 @@
 							}
 						}, callback);
 					};
-
+					
 					result.index = function(name){
 						return wrap.index(function(){
 							return idbObjectStore.index(name);
 						});
 					};
-
+					
 					result.createIndex = function(prop, options, indexName){
 						if (arguments.length === 2 && typeof options === "string") {
 							indexName = arguments[1]
@@ -158,14 +158,14 @@
 							return idbObjectStore.createIndex(indexName, prop, options);
 						});
 					};
-
+					
 					result.deleteIndex = function(indexName){
 						return idbObjectStore.deleteIndex(indexName);
 					}
-
+					
 					return result;
 				},
-
+				
 				"range": function(r){
 					if ($.isArray(r)) {
 						if (r.length === 1) {
@@ -179,7 +179,7 @@
 						return r;
 					}
 				},
-
+				
 				"cursor": function(idbCursor, callback){
 					return $.Deferred(function(dfd){
 						try {
@@ -192,7 +192,7 @@
 									return;
 								}
 								var elem = {
-									// Delete, update do not move
+									// Delete, update do not move 
 									"delete": function(){
 										return wrap.request(function(){
 											return cursorReq.result["delete"]();
@@ -238,7 +238,7 @@
 						}
 					});
 				},
-
+				
 				"index": function(index){
 					try {
 						var idbIndex = (typeof index === "function" ? index() : index);
@@ -254,7 +254,7 @@
 								} else {
 									return idbIndex.openCursor(wrap.range(range));
 								}
-
+								
 							}, callback);
 						},
 						"eachKey": function(callback, range, direction){
@@ -283,15 +283,15 @@
 					};
 				}
 			}
-
+			
 			////////////////////////////////////////////////////////////////////////////////////////////////////
-
+			
 			var openReqShim = function(dbName, version){
 				var me = this;
 				var IDBRequest = function(){
 					this.onsuccess = this.onerror = this.onblocked = this.onupgradeneeded = null;
 				};
-
+				
 				function copyReq(req){
 					req = req || dbOpenReq;
 					for (var key in req) {
@@ -300,14 +300,14 @@
 						}
 					}
 				}
-
+				
 				function callback(fn, context, argArray, func){
 					//window.setTimeout(function(){
 					(typeof context[fn] === "function") && context[fn].apply(context, argArray);
 					(typeof func === "function") && func();
 					//}, 1);
 				}
-
+				
 				var dbOpenReq = version ? indexedDB.open(dbName, version) : indexedDB.open(dbName);
 				var result = new IDBRequest();
 				dbOpenReq.onsuccess = function(e){
@@ -335,7 +335,7 @@
 								var newDbOpenReq = indexedDB.open(dbName);
 								delete result.transaction;
 								delete result.result;
-
+								
 								newDbOpenReq.onsuccess = function(e){
 									console.log("DB Opened without version change", newDbOpenReq.result);
 									copyReq(newDbOpenReq);
@@ -395,14 +395,14 @@
 						result["onupgradeneeded"](e);
 					}
 				};
-
+				
 				return result;
 			}
-
-
+			
+			
 			////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+			
+			
 			// Start with opening the database
 			var dbPromise = wrap.request(function(){
 				console.log("Trying to open DB with", version);
@@ -422,7 +422,7 @@
 			}, function(db, e){
 				if (e && e.type === "upgradeneeded") {
 					if (config && config.schema) {
-						// Assuming that version is always an integer
+						// Assuming that version is always an integer 
 						console.log("Upgrading DB to ", db.version);
 						for (var i = e.oldVersion + 1; i <= e.newVersion; i++) {
 							typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
@@ -433,14 +433,14 @@
 					}
 				}
 			});
-
+			
 			return $.extend(dbPromise, {
 				"cmp": function(key1, key2){
 					return indexedDB.cmp(key1, key2);
 				},
 				"deleteDatabase": function(){
-					// Kinda looks ugly coz DB is opened before it needs to be deleted.
-					// Blame it on the API
+					// Kinda looks ugly coz DB is opened before it needs to be deleted. 
+					// Blame it on the API 
 					return $.Deferred(function(dfd){
 						dbPromise.then(function(db, e){
 							db.close();
@@ -493,12 +493,12 @@
 							console.log("Database open is blocked or upgrade needed", res, e.type);
 							//dfd.notifyWith(this, ["", e]);
 						});
-
+						
 					});
 				},
 				"objectStore": function(storeName, mode){
 					var me = this, result = {};
-
+					
 					function op(callback){
 						return $.Deferred(function(dfd){
 							function onTransactionProgress(trans, callback){
@@ -571,20 +571,20 @@
 							});
 						});
 					};
-
+					
 					function crudOp(opName, args){
 						return op(function(wrappedObjectStore){
 							return wrappedObjectStore[opName].apply(wrappedObjectStore, args);
 						});
 					}
-
+					
 					function indexOp(opName, indexName, args){
 						return op(function(wrappedObjectStore){
 							var index = wrappedObjectStore.index(indexName);
 							return index[opName].apply(index[opName], args);
 						});
 					}
-
+					
 					var crud = ["add", "delete", "get", "put", "clear", "count", "each"];
 					for (var i = 0; i < crud.length; i++) {
 						result[crud[i]] = (function(op){
@@ -593,7 +593,7 @@
 							}
 						})(crud[i]);
 					}
-
+					
 					result.index = function(indexName){
 						return {
 							"each": function(callback, range, direction){
@@ -610,13 +610,13 @@
 							}
 						};
 					}
-
+					
 					return result;
 				}
 			});
 		}
 	});
-
+	
 	$.indexedDB.IDBCursor = IDBCursor;
 	$.indexedDB.IDBTransaction = IDBTransaction;
 	$.idb = $.indexedDB;
