@@ -2,7 +2,7 @@
 module.exports = function(grunt){
 	// Project configuration.
 	var saucekey = null;
-	if (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_SECURE_ENV_VARS) {
+	if (process.env.TRAVIS_SECURE_ENV_VARS) {
 		saucekey = process.env.saucekey;
 	}
 	grunt.initConfig({
@@ -84,7 +84,7 @@ module.exports = function(grunt){
 	});
 	
 	// Default task.
-	grunt.loadNpmTasks('grunt-saucelabs-qunit');
+	grunt.loadNpmTasks('grunt-saucelabs');
 	grunt.registerTask('build', 'lint');
 	grunt.registerTask("forever", function(){
 		this.async();
@@ -115,7 +115,7 @@ module.exports = function(grunt){
 	
 	var testJobs = ["build", "server"];
 	if (process.env.CI && process.env.TRAVIS) {
-		if (saucekey !== null) {
+		if (saucekey !== null && !process.env.TRAVIS_PULL_REQUEST) {
 			testJobs.push("saucelabs-qunit");
 		}
 		testJobs.push("publish");
