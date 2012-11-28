@@ -19,7 +19,7 @@
     "keywords": ["indexedDB", "database", "jquery"],
     "devDependencies": {
         "grunt": "~0.3.12",
-        "grunt-saucelabs-qunit": "*",
+        "grunt-saucelabs": "*",
 		"request" : "*"
     },
     "bundleDependencies": [],
