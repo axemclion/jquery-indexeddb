@@ -1,0 +1,24 @@
+{
+	"name": "indexeddb",
+	"title": "Jquery-IndexedDB",
+	"description": "A Jquery Plugin for the IndexedDB API",
+	"version": "0.1.0",
+	"keywords": ["indexeddb", "offline", "storage"],
+	"homepage": "http://nparashuram.com/jquery-indexeddb",
+	"docs": "http://nparashuram.com/jquery-indexeddb",
+	"demo": "http://nparashuram.com/jquery-indexeddb/example/index.html",
+	"download": "http://nparashuram.com/jquery-indexeddb/jquery.indexeddb.js",
+	"bugs": "https://github.com/axemclion/jquery-indexeddb/issues",
+	"author": {
+		"name": "Parashuram",
+		"email": "code@nparashuram.com",
+		"url": "http://nparashuram.com/"
+	},
+	"licenses": [{
+		"type": "GPLv2",
+		"url": "http://www.example.com/licenses/gpl.html"
+	}],
+	"dependencies": {
+		"jquery": ">=1.8.0"
+	}
+}
