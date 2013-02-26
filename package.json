@@ -1,30 +1,39 @@
 {
-    "name": "jquery-indexeddb",
-    "preferGlobal": "false",
-    "version": "0.1.0",
-    "author": "Parashuram <code@nparashuram.com>",
-    "description": "A Jquery plugin for the IndexedDB API",
-    "scripts": {
-        "start": "grunt",
-        "test": "grunt test"
-    },
-    "repository": {
-        "type": "git",
-	    "url": "git://github.com/axemclion/jquery-indexeddb.git"
-    },
-	"bugs": {
-    	"url": "https://github.com/axemclion/jquery-indexeddb/issues"
-  	},
-	"main": "grunt.js",
-    "keywords": ["indexedDB", "database", "jquery"],
-    "devDependencies": {
-        "grunt": "~0.3.12",
-        "grunt-saucelabs": "*",
-		"request" : "*"
-    },
-    "bundleDependencies": [],
-    "license": "MIT",
-    "engines": {
-        "node": ">=0.6"
-    }
+  "name": "jquery-indexeddb",
+  "preferGlobal": "false",
+  "version": "0.2.0",
+  "author": "Parashuram <code@nparashuram.com>",
+  "description": "A Jquery plugin for the IndexedDB API",
+  "scripts": {
+    "start": "grunt",
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/axemclion/jquery-indexeddb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/axemclion/jquery-indexeddb/issues"
+  },
+  "main": "grunt.js",
+  "keywords": [
+    "indexedDB",
+    "database",
+    "jquery"
+  ],
+  "devDependencies": {
+    "grunt": "~0.4.0",
+    "grunt-saucelabs": "~3.0.0",
+    "request": "~2.14.0",
+    "grunt-contrib-uglify": "~0.1.1",
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-contrib-watch": "~0.2.0",
+    "grunt-contrib-connect": "~0.1.2",
+    "grunt-contrib-concat": "~0.1.3"
+  },
+  "bundleDependencies": [],
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
+  }
 }
