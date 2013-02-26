@@ -3,7 +3,8 @@ node_js:
    - 0.8
 notifications:
     email: false
-    
+before_script:
+  - npm install -g grunt-cli
 env:
     global:
       - secure: "B7pAZwdmje6ZzZNF6KZzmG0YfWAcr+yMB0GE2Dv4PWQXqhbfCV9MtzHXGWjR\nlWfIl4+iUEABvtqm7YUKfG9XRx6qMF1WViDNToRXZWBn+ntDE70RnsN8SaIp\nV8qGPOR4lSf7a0d8kmnGTgJONc778LEqbHGL2csgJtMX3D70PlQ="

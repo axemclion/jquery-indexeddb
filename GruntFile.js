@@ -1,28 +1,24 @@
 /* global module:false */
-module.exports = function(grunt){
+module.exports = function(grunt) {
 	// Project configuration.
 	var saucekey = null;
-	if (process.env.TRAVIS_SECURE_ENV_VARS) {
+	if (typeof process.env.saucekey !== "undefined") {
 		saucekey = process.env.saucekey;
 	}
 	grunt.initConfig({
 		pkg: '<json:package.json>',
-		meta: {
-			banner: '/*! <%= pkg.name %> */'
-		},
-		lint: {
+		jshint: {
 			files: ['grunt.js', 'src/**/*.js', 'test/**/*.js']
 		},
-		
-		server: {
-			base: '.',
-			port: 9999
+		connect: {
+			server: {
+				options: {
+					base: '.',
+					port: 9999
+				}
+			}
 		},
-		
-		qunit: {
-			all: ['http://localhost:9999/test/index.html']
-		},
-		
+
 		'saucelabs-qunit': {
 			all: {
 				username: 'indexeddbshim',
@@ -35,21 +31,21 @@ module.exports = function(grunt){
 				}]
 			}
 		},
-		
+
 		jshint: {
 			options: {
 				camelcase: true,
 				nonew: true,
-				curly: true,// require { }
-				eqeqeq: true,// === instead of ==
-				immed: true,// wrap IIFE in parentheses
-				latedef: true,// variable declared before usage
-				newcap: true,// capitalize class names
-				undef: true,// checks for undefined variables
+				curly: true, // require { }
+				eqeqeq: true, // === instead of ==
+				immed: true, // wrap IIFE in parentheses
+				latedef: true, // variable declared before usage
+				newcap: true, // capitalize class names
+				undef: true, // checks for undefined variables
 				regexp: true,
 				evil: true,
-				eqnull: true,// == allowed for undefined/null checking
-				expr: true,// allow foo && foo()
+				eqnull: true, // == allowed for undefined/null checking
+				expr: true, // allow foo && foo()
 				browser: true
 				// browser environment
 			},
@@ -57,7 +53,7 @@ module.exports = function(grunt){
 				DEBUG: true,
 				console: true,
 				require: true,
-				
+
 				// Tests.
 				_: true,
 				asyncTest: true,
@@ -82,19 +78,21 @@ module.exports = function(grunt){
 		},
 		uglify: {}
 	});
-	
-	// Default task.
+
 	grunt.loadNpmTasks('grunt-saucelabs');
-	grunt.registerTask('build', 'lint');
-	grunt.registerTask("forever", function(){
-		this.async();
-	});
-	
-	grunt.registerTask("publish", function(){
+	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-connect');
+
+	grunt.registerTask('build', 'jshint');
+
+	grunt.registerTask("publish", function() {
 		var done = this.async();
 		console.log("Running publish action");
 		var request = require("request");
-		request("https://api.travis-ci.org/repos/axemclion/jquery-indexeddb/builds.json", function(err, res, body){
+		request("https://api.travis-ci.org/repos/axemclion/jquery-indexeddb/builds.json", function(err, res, body) {
 			var commit = JSON.parse(body)[0];
 			var commitMessage = ["Commit from Travis Build #", commit.number, "\nBuild - https://travis-ci.org/axemclion/jquery-indexeddb/builds/", commit.id, "\nBranch : ", commit.branch, "@ ", commit.commit];
 			console.log("Got Travis Build details");
@@ -106,21 +104,23 @@ module.exports = function(grunt){
 					"head": "master",
 					"commit_message": commitMessage.join("")
 				})
-			}, function(err, response, body){
+			}, function(err, response, body) {
 				console.log(body);
 				done(!err);
 			});
 		});
 	});
-	
-	var testJobs = ["build", "server"];
+
+	var testJobs = ["build", "connect"];
+	if (saucekey !== null) {
+		testJobs.push("saucelabs-qunit");
+	}
+
 	if (process.env.CI && process.env.TRAVIS) {
-		if (saucekey !== null && !process.env.TRAVIS_PULL_REQUEST) {
-			testJobs.push("saucelabs-qunit");
-		}
 		testJobs.push("publish");
 	}
-	
-	grunt.registerTask('test', testJobs.join(" "));
+	testJobs.push("publish");
+
+	grunt.registerTask('test', testJobs);
 	grunt.registerTask('default', 'build');
 };
