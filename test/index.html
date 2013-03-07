@@ -57,11 +57,12 @@
         	
         	queuedAsyncTest("Open Database without schema", function(){
         	
-        		$.indexedDB(DB.NAME).then(function(res, e){
+        		$.indexedDB(DB.NAME).then(function(db, e){
         			ok(true, "Database opened successfully");
         			_("DB opened");
         			start();
         			nextTest();
+                    db.close();
         		}, function(err, e){
         			ok(false, "Could not open database" + e);
         			_("Could not open DB");
@@ -109,6 +110,7 @@
         			ok(true, "Opened Database with schema");
         			equal(db.objectStoreNames.length, 2, "Count of object Stores");
         			_("DB with version opened");
+                    db.close();
         			start();
         			nextTest();
         		}, function(err, e){

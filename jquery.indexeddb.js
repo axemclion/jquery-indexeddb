@@ -56,16 +56,16 @@
 						try {
 							var idbRequest = typeof req === "function" ? req(args) : req;
 							idbRequest.onsuccess = function(e){
-								//console.log("Success", idbRequest, e, this);
+								console.log("Success", idbRequest, e, this);
 								dfd.resolveWith(idbRequest, [idbRequest.result, e]);
 							};
 							idbRequest.onerror = function(e){
-								//console.log("Error", idbRequest, e, this);
+								console.log("Error", idbRequest, e, this);
 								dfd.rejectWith(idbRequest, [idbRequest.error, e]);
 							};
 							if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
 								idbRequest.onblocked = function(e){
-									//console.log("Blocked", idbRequest, e, this);
+									console.log("Blocked", idbRequest, e, this);
 									var res;
 									try {
 										res = idbRequest.result;
@@ -77,7 +77,7 @@
 							}
 							if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
 								idbRequest.onupgradeneeded = function(e){
-									//console.log("Upgrade", idbRequest, e, this);
+									console.log("Upgrade", idbRequest, e, this);
 									dfd.notifyWith(idbRequest, [idbRequest.result, e]);
 								};
 							}
@@ -289,7 +289,7 @@
 			// Start with opening the database
 			var dbPromise = wrap.request(function(){
 				//console.log("Trying to open DB with", version);
-				return version ?  indexedDB.open(dbName, version) : indexedDB.open(dbName);
+				return version?  indexedDB.open(dbName, parseInt(version)) : indexedDB.open(dbName);
 			});
 			dbPromise.then(function(db, e){
 				//console.log("DB opened at", db.version);

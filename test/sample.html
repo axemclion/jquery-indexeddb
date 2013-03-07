@@ -16,29 +16,46 @@
             }
             
             function ok(){
-            	console.log(arguments)
+            	console.log.apply(console, arguments)
             }
             
-            var start = nextTest = function(){
+            var start = nextTest = stop = function(){
             
             }
             
             var equal = notEqual = function(){
-            	console.info(arguments);
+            	console.info.apply(console, arguments);
+            }
+
+            function _(msg){
+                return function(){
+                    console.log(msg, arguments);
+                }
             }
         </script>
         <script type = "text/javascript">
-            $.indexedDB("SomeDatabase", {
-            	"schema": {
-            		"1": function(versionTransaction){
-            			console.log("Running update 1");
-            			var objectStore2 = versionTransaction.createObjectStore("b", {
-            				"keyPath": "id",
-            				"autoIncrement": true
-            			});
-            		}
-            	}
-            });
+         $.indexedDB(DB.NAME, {
+                    "version": 5,
+                    "upgrade": function(versionTransaction){
+                        _("Upgrade method called");
+                        var objectStore3 = versionTransaction.createObjectStore(DB.OBJECT_STORE_3);
+                    }
+                }).then(function(res, e){
+                    ok(true, "Database opened");
+                    equal(res.objectStoreNames.length, 3, "Number of object stores " + res.objectStoreNames.length);
+                    start();
+                    nextTest();
+                }, function(err, e){
+                    ok(false, "Could not open database");
+                    _("Opening database failed");
+                    start();
+                    nextTest();
+                }, function(res, e){
+                    ok(true, e.type + " method fired");
+                    _("Database upgrade in progress");
+                    start();
+                    stop();
+                });
         </script>
     </body>
 </html>
