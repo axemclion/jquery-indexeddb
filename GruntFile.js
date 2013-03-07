@@ -7,9 +7,6 @@ module.exports = function(grunt) {
 	}
 	grunt.initConfig({
 		pkg: '<json:package.json>',
-		jshint: {
-			files: ['grunt.js', 'src/**/*.js', 'test/**/*.js']
-		},
 		connect: {
 			server: {
 				options: {
@@ -23,7 +20,6 @@ module.exports = function(grunt) {
 			all: {
 				username: 'indexeddbshim',
 				key: saucekey,
-				testname: 'jquery-indexeddb',
 				tags: ['master'],
 				urls: ['http://127.0.0.1:9999/test/index.html'],
 				browsers: [{
@@ -31,52 +27,56 @@ module.exports = function(grunt) {
 				}]
 			}
 		},
-
 		jshint: {
-			options: {
-				camelcase: true,
-				nonew: true,
-				curly: true, // require { }
-				eqeqeq: true, // === instead of ==
-				immed: true, // wrap IIFE in parentheses
-				latedef: true, // variable declared before usage
-				newcap: true, // capitalize class names
-				undef: true, // checks for undefined variables
-				regexp: true,
-				evil: true,
-				eqnull: true, // == allowed for undefined/null checking
-				expr: true, // allow foo && foo()
-				browser: true
-				// browser environment
-			},
-			globals: {
-				DEBUG: true,
-				console: true,
-				require: true,
+			all: {
+				files: {
+					src: ['grunt.js', 'test/**/*.js']
+				},
+				options: {
+					camelcase: true,
+					nonew: true,
+					curly: true, // require { }
+					eqeqeq: true, // === instead of ==
+					immed: true, // wrap IIFE in parentheses
+					latedef: true, // variable declared before usage
+					newcap: true, // capitalize class names
+					undef: true, // checks for undefined variables
+					regexp: true,
+					evil: true,
+					eqnull: true, // == allowed for undefined/null checking
+					expr: true, // allow foo && foo()
+					browser: true // browser environment
+				},
+				globals: {
+					DEBUG: true,
+					console: true,
+					require: true,
 
-				// Tests.
-				_: true,
-				asyncTest: true,
-				DB: true,
-				dbVersion: true,
-				deepEqual: true,
-				equal: true,
-				expect: true,
-				fail: true,
-				module: true,
-				nextTest: true,
-				notEqual: true,
-				ok: true,
-				sample: true,
-				start: true,
-				stop: true,
-				queuedAsyncTest: true,
-				queuedModule: true,
-				unescape: true,
-				process: true
+					// Tests.
+					_: true,
+					asyncTest: true,
+					DB: true,
+					dbVersion: true,
+					deepEqual: true,
+					equal: true,
+					expect: true,
+					fail: true,
+					module: true,
+					nextTest: true,
+					notEqual: true,
+					ok: true,
+					sample: true,
+					start: true,
+					stop: true,
+					queuedAsyncTest: true,
+					queuedModule: true,
+					unescape: true,
+					process: true
+				}
 			}
 		},
-		uglify: {}
+		uglify: {},
+		watch: {}
 	});
 
 	grunt.loadNpmTasks('grunt-saucelabs');
@@ -123,4 +123,5 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('test', testJobs);
 	grunt.registerTask('default', 'build');
+	grunt.registerTask('dev', ['connect', 'watch']);
 };
