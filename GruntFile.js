@@ -20,14 +20,10 @@ module.exports = function(grunt) {
 			all: {
 				username: 'indexeddbshim',
 				key: saucekey,
-				testname: 'jquery-indexeddb',
 				tags: ['master'],
 				urls: ['http://127.0.0.1:9999/test/index.html'],
 				browsers: [{
 					browserName: 'chrome'
-				},
-				{
-					browserName: 'firefox'
 				}]
 			}
 		},

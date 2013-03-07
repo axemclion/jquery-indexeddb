@@ -1,7 +1,7 @@
 {
   "name": "jquery-indexeddb",
   "preferGlobal": "false",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Parashuram <code@nparashuram.com>",
   "description": "A Jquery plugin for the IndexedDB API",
   "scripts": {
