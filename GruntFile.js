@@ -24,6 +24,10 @@ module.exports = function(grunt) {
 				urls: ['http://127.0.0.1:9999/test/index.html'],
 				browsers: [{
 					browserName: 'chrome'
+				}, {
+					browserName: 'internet explorer',
+					platform: 'Windows 2012',
+					version: '10'
 				}]
 			}
 		},
