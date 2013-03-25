@@ -11,7 +11,7 @@ module.exports = function(grunt) {
 			server: {
 				options: {
 					base: '.',
-					port: 9999
+					port: 8080
 				}
 			}
 		},
@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 				username: 'indexeddbshim',
 				key: saucekey,
 				tags: ['master'],
-				urls: ['http://127.0.0.1:9999/test/index.html'],
+				urls: ['http://127.0.0.1:8080/test/index.html'],
 				browsers: [{
 					browserName: 'chrome'
 				}, {
@@ -31,6 +31,7 @@ module.exports = function(grunt) {
 				}]
 			}
 		},
+
 		jshint: {
 			all: {
 				files: {
@@ -55,6 +56,8 @@ module.exports = function(grunt) {
 					DEBUG: true,
 					console: true,
 					require: true,
+					jQuery: true,
+					module: true,
 
 					// Tests.
 					_: true,
@@ -79,7 +82,29 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-		uglify: {},
+
+		groundskeeper: {
+			main: {
+				files: {
+					'dist/jquery.indexeddb.js': ['src/jquery.indexeddb.js']
+				},
+				options: {
+					console: false,
+					debugger: false
+				}
+			}
+		},
+
+		uglify: {
+			options: {
+				report: 'gzip',
+			},
+			main: {
+				files: {
+					'dist/jquery.indexeddb.min.js': ['src/jquery.indexeddb.js']
+				}
+			}
+		},
 		watch: {}
 	});
 
@@ -89,8 +114,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-connect');
-
-	grunt.registerTask('build', 'jshint');
+	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-groundskeeper');
 
 	grunt.registerTask("publish", function() {
 		var done = this.async();
@@ -125,7 +150,8 @@ module.exports = function(grunt) {
 	}
 	testJobs.push("publish");
 
+	grunt.registerTask('build', ['jshint', 'groundskeeper', 'uglify']);
 	grunt.registerTask('test', testJobs);
 	grunt.registerTask('default', 'build');
-	grunt.registerTask('dev', ['connect', 'watch']);
+	grunt.registerTask('dev', ['build', 'connect', 'watch']);
 };
