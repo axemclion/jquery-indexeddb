@@ -7,7 +7,7 @@
 	"homepage": "http://nparashuram.com/jquery-indexeddb",
 	"docs": "http://nparashuram.com/jquery-indexeddb",
 	"demo": "http://nparashuram.com/jquery-indexeddb/example/index.html",
-	"download": "http://nparashuram.com/jquery-indexeddb/jquery.indexeddb.js",
+	"download": "http://nparashuram.com/jquery-indexeddb/dist/jquery.indexeddb.js",
 	"bugs": "https://github.com/axemclion/jquery-indexeddb/issues",
 	"author": {
 		"name": "Parashuram",
