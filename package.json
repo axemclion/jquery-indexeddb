@@ -1,7 +1,7 @@
 {
   "name": "jquery-indexeddb",
   "preferGlobal": "false",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Parashuram <code@nparashuram.com>",
   "description": "A Jquery plugin for the IndexedDB API",
   "scripts": {
@@ -19,8 +19,7 @@
   "keywords": [
     "indexedDB",
     "database",
-    "jquery"
-  ],
+    "jquery"],
   "devDependencies": {
     "grunt": "~0.4.0",
     "grunt-saucelabs": "~3.0.0",
@@ -31,11 +30,12 @@
     "grunt-contrib-connect": "~0.1.2",
     "grunt-contrib-concat": "~0.1.3",
     "grunt-contrib-copy": "~0.4.0",
-    "grunt-groundskeeper": "~0.1.3"
+    "grunt-groundskeeper": "~0.1.3",
+    "grunt-contrib-clean": "~0.4.0"
   },
   "bundleDependencies": [],
   "license": "MIT",
   "engines": {
-    "node": ">=0.6"
+    "node": ">=0.8"
   }
 }

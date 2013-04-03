@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 		saucekey = process.env.saucekey;
 	}
 	grunt.initConfig({
-		pkg: '<json:package.json>',
+		pkg: grunt.file.readJSON('package.json'),
 		connect: {
 			server: {
 				options: {
@@ -98,24 +98,19 @@ module.exports = function(grunt) {
 		uglify: {
 			options: {
 				report: 'gzip',
+				banner: '/*! <%= pkg.name %>  v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
 			},
 			main: {
 				files: {
-					'dist/jquery.indexeddb.min.js': ['src/jquery.indexeddb.js']
+					'dist/<%= (pkg.name).replace(/-/g, ".")%>.min.js': ['src/jquery.indexeddb.js']
 				}
 			}
 		},
-		watch: {}
+		watch: {},
+		clean: {
+			dist: ['./dist']
+		}
 	});
-
-	grunt.loadNpmTasks('grunt-saucelabs');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-connect');
-	grunt.loadNpmTasks('grunt-contrib-copy');
-	grunt.loadNpmTasks('grunt-groundskeeper');
 
 	grunt.registerTask("publish", function() {
 		var done = this.async();
@@ -139,6 +134,11 @@ module.exports = function(grunt) {
 			});
 		});
 	});
+
+	// Loading dependencies
+	for (var key in grunt.file.readJSON('package.json').devDependencies) {
+		if (key !== 'grunt' && key.indexOf('grunt') === 0) grunt.loadNpmTasks(key);
+	}
 
 	var testJobs = ["build", "connect"];
 	if (saucekey !== null) {
