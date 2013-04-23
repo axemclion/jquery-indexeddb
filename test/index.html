@@ -521,6 +521,30 @@
         		});
         	});
         	
+            queuedAsyncTest("Index Counts", function(){
+                var c = 0;
+                var objectStore = $.indexedDB(DB.NAME).objectStore(DB.OBJECT_STORE_1);
+                objectStore.index("Int").each(function(elem){
+                    c++;
+                }, [10, 90]).then(function(res, e){
+                    objectStore.index('Int').count().then(function(num){
+                        ok(num, c, "Counted Objects " + num);
+                        start();
+                        nextTest();
+                    }, function(err, e){
+                        ok(false, "Count not count objects");
+                        _("Could not count objects");
+                        start();
+                        nextTest();
+                    });
+                }, function(err, e){
+                    ok(false, "Index Iteration NOT completed");
+                    _("Index Iteration NOT completed");
+                    start();
+                    nextTest();
+                });
+            });
+
         	queuedAsyncTest("Index Iteration with range, reverse", function(){
         		var key = sample.integer();
         		var value = sample.obj();
