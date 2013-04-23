@@ -38,48 +38,8 @@ module.exports = function(grunt) {
 					src: ['grunt.js', 'test/**/*.js']
 				},
 				options: {
-					camelcase: true,
-					nonew: true,
-					curly: true, // require { }
-					eqeqeq: true, // === instead of ==
-					immed: true, // wrap IIFE in parentheses
-					latedef: true, // variable declared before usage
-					newcap: true, // capitalize class names
-					undef: true, // checks for undefined variables
-					regexp: true,
-					evil: true,
-					eqnull: true, // == allowed for undefined/null checking
-					expr: true, // allow foo && foo()
-					browser: true // browser environment
-				},
-				globals: {
-					DEBUG: true,
-					console: true,
-					require: true,
-					jQuery: true,
-					module: true,
-
-					// Tests.
-					_: true,
-					asyncTest: true,
-					DB: true,
-					dbVersion: true,
-					deepEqual: true,
-					equal: true,
-					expect: true,
-					fail: true,
-					module: true,
-					nextTest: true,
-					notEqual: true,
-					ok: true,
-					sample: true,
-					start: true,
-					stop: true,
-					queuedAsyncTest: true,
-					queuedModule: true,
-					unescape: true,
-					process: true
-				}
+					jshintrc: '.jshintrc'
+				}	
 			}
 		},
 
@@ -98,7 +58,10 @@ module.exports = function(grunt) {
 		uglify: {
 			options: {
 				report: 'gzip',
-				banner: '/*! <%= pkg.name %>  v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+				banner: '/*! <%= pkg.name %>  v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+				sourceMap: 'dist/<%= (pkg.name).replace(/-/g, ".") %>.min.map',
+				sourceMapRoot: 'http://nparashuram.com/jquery-indexeddb/',
+				sourceMappingURL: 'http://nparashuram.com/jquery-indexeddb/dist/<%=pkg.name%>.min.map'
 			},
 			main: {
 				files: {
@@ -106,7 +69,12 @@ module.exports = function(grunt) {
 				}
 			}
 		},
-		watch: {},
+		watch: {
+			all : {
+				files: ['src/*.js'],
+				tasks: ['uglify']
+			}
+		},
 		clean: {
 			dist: ['./dist']
 		}
