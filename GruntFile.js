@@ -91,6 +91,9 @@ module.exports = function(grunt) {
 			request({
 				url: "https://api.github.com/repos/axemclion/jquery-indexeddb/merges?access_token=" + process.env.githubtoken,
 				method: "POST",
+				headers: {
+					'User-Agent': 'Travis'
+				},
 				body: JSON.stringify({
 					"base": "gh-pages",
 					"head": "master",
