@@ -22,7 +22,7 @@
     "jquery"],
   "devDependencies": {
     "grunt": "~0.4.0",
-    "grunt-saucelabs": "~3.0.0",
+    "grunt-saucelabs": "~4.0.0",
     "request": "~2.14.0",
     "grunt-contrib-uglify": "~0.1.1",
     "grunt-contrib-jshint": "~0.1.1",
