@@ -172,7 +172,7 @@
 						if (r.length === 1) {
 							return IDBKeyRange.only(r[0]);
 						} else {
-							return IDBKeyRange.bound(r[0], r[1], r[2] || true, r[3] || true);
+							return IDBKeyRange.bound(r[0], r[1], (typeof r[2] === 'undefined') ? true : r[2], (typeof r[3] === 'undefined') ? true : r[3]);
 						}
 					} else if (typeof r === "undefined") {
 						return null;
