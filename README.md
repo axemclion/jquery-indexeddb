@@ -45,3 +45,8 @@ A typical operation using the IndexedDB API would involve using the request mode
 ```
 
 Read more about the API syntax in the (documentation)[https://github.com/axemclion/jquery-indexeddb/blob/master/docs/README.md]. 
+
+Release Notes
+-------------
+
+* 1.0.0 = Changed the way ranges are specified, made them inline with how they are specified in the (specification)[http://www.w3.org/TR/IndexedDB/#widl-IDBKeyRange-lowerOpen]. 
