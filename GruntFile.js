@@ -67,7 +67,7 @@ module.exports = function(grunt) {
 			},
 			main: {
 				files: {
-					'dist/<%= (pkg.name).replace(/-/g, ".")%>.min.js': ['src/jquery.indexeddb.js']
+					'dist/<%= (pkg.name).replace(/-/g, ".")%>.min.js': ['dist/jquery.indexeddb.js']
 				}
 			}
 		},
