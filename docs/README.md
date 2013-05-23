@@ -228,8 +228,8 @@ iterationPromise.fail(function(error, event){
 });
 
 ```
-`range` limits the results and can be an array like `[lower_limit, upper_limit, can_include_lower, can_include_upper]`.
-If only one element is specified in the array, it becomes an equals clause. The parameters `can_include_lower` and `can_include_upper` are optional and default to true.
+`range` limits the results and can be an array like `[lower, upper, lowerOpen, upperOpen]`.
+If only one element is specified in the array, it becomes an equals clause. The parameters `lowerOpen` and `upperOpen` are optional. If no value is specified for either upper or for lower bounds, they are included. These arguments behave as described in the [specification](http://www.w3.org/TR/IndexedDB/#widl-IDBKeyRange-lowerOpen)
 
 In addition to the above CURD operation, `objectStore.index` methods also allow operations using indexes. See [indexes] (#index) for details. 
 
