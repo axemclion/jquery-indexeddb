@@ -1,3 +1,4 @@
+'use strict';
 (function($, undefined) {
 	var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 	var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
@@ -42,7 +43,7 @@
 				var version = config.version;
 				if (config.schema && !version) {
 					var max = -1;
-					for (key in config.schema) {
+					for (var key in config.schema) {
 						max = max > key ? max : key;
 					}
 					version = config.version || max;
