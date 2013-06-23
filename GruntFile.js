@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 			all: {
 				options: {
 					username: 'indexeddbshim',
-					key: process.env.saucekey || '',
+					key: process.env.SAUCE_ACCESS_KEY || '',
 					tags: ['master'],
 					urls: ['http://127.0.0.1:8080/test/index.html'],
 					browsers: [{
@@ -87,7 +87,7 @@ module.exports = function(grunt) {
 	}
 
 	var testJobs = ["build", "connect"];
-	if (typeof process.env.saucekey !== 'undefined') {
+	if (typeof process.env.SAUCE_ACCESS_KEY !== 'undefined') {
 		testJobs.push("saucelabs-qunit");
 	}
 
