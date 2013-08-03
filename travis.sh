@@ -40,6 +40,11 @@ if [ "$1" = "merge" ] ; then
 	git checkout master
 	git merge incoming-pr --log 
 	git push $repo master -q 2> /dev/null
+
+	echo "Merging master into gh-pages"
+	git checkout gh-pages
+	git merge master --log
+	git push $repo gh-pages -q 2> /dev/null
 else
 	# If build failed, travis after-failure will send ./travis.sh revert
 	echo "Reverting dev branch to what master was"
