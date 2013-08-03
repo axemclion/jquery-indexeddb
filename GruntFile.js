@@ -1,10 +1,6 @@
 /* global module:false */
+"use strict";
 module.exports = function(grunt) {
-	// Project configuration.
-	var saucekey = null;
-	if (typeof process.env.saucekey !== "undefined") {
-		saucekey = process.env.saucekey;
-	}
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		connect: {
@@ -20,16 +16,17 @@ module.exports = function(grunt) {
 			all: {
 				options: {
 					username: 'indexeddbshim',
-					key: saucekey,
+					key: process.env.SAUCE_ACCESS_KEY || '',
 					tags: ['master'],
 					urls: ['http://127.0.0.1:8080/test/index.html'],
 					browsers: [{
-						browserName: 'chrome'
-					}, {
-						browserName: 'internet explorer',
-						platform: 'Windows 2012',
-						version: '10'
-					}]
+							browserName: 'chrome'
+						}, {
+							browserName: 'internet explorer',
+							platform: 'Windows 2012',
+							version: '10'
+						}
+					]
 				}
 			}
 		},
@@ -37,11 +34,11 @@ module.exports = function(grunt) {
 		jshint: {
 			all: {
 				files: {
-					src: ['grunt.js', 'test/**/*.js']
+					src: ['Gruntfile.js', 'test/**/*.js']
 				},
 				options: {
 					jshintrc: '.jshintrc'
-				}	
+				}
 			}
 		},
 
@@ -51,8 +48,8 @@ module.exports = function(grunt) {
 					'dist/jquery.indexeddb.js': ['src/jquery.indexeddb.js']
 				},
 				options: {
-					console: false,
-					debugger: false
+					'console': false,
+					'debugger': false
 				}
 			}
 		},
@@ -72,7 +69,7 @@ module.exports = function(grunt) {
 			}
 		},
 		watch: {
-			all : {
+			all: {
 				files: ['src/*.js'],
 				tasks: ['uglify']
 			}
@@ -82,46 +79,17 @@ module.exports = function(grunt) {
 		}
 	});
 
-	grunt.registerTask("publish", function() {
-		var done = this.async();
-		console.log("Running publish action");
-		var request = require("request");
-		request("https://api.travis-ci.org/repos/axemclion/jquery-indexeddb/builds.json", function(err, res, body) {
-			var commit = JSON.parse(body)[0];
-			var commitMessage = ["Commit from Travis Build #", commit.number, "\nBuild - https://travis-ci.org/axemclion/jquery-indexeddb/builds/", commit.id, "\nBranch : ", commit.branch, "@ ", commit.commit];
-			console.log("Got Travis Build details");
-			request({
-				url: "https://api.github.com/repos/axemclion/jquery-indexeddb/merges?access_token=" + process.env.githubtoken,
-				method: "POST",
-				headers: {
-					'User-Agent': 'Travis'
-				},
-				body: JSON.stringify({
-					"base": "gh-pages",
-					"head": "master",
-					"commit_message": commitMessage.join("")
-				})
-			}, function(err, response, body) {
-				console.log(body);
-				done(!err);
-			});
-		});
-	});
-
 	// Loading dependencies
 	for (var key in grunt.file.readJSON('package.json').devDependencies) {
-		if (key !== 'grunt' && key.indexOf('grunt') === 0) grunt.loadNpmTasks(key);
+		if (key !== 'grunt' && key.indexOf('grunt') === 0) {
+			grunt.loadNpmTasks(key);
+		}
 	}
 
 	var testJobs = ["build", "connect"];
-	if (saucekey !== null) {
+	if (typeof process.env.SAUCE_ACCESS_KEY !== 'undefined') {
 		testJobs.push("saucelabs-qunit");
 	}
-
-	if (process.env.CI && process.env.TRAVIS) {
-		testJobs.push("publish");
-	}
-	testJobs.push("publish");
 
 	grunt.registerTask('build', ['jshint', 'groundskeeper', 'uglify']);
 	grunt.registerTask('test', testJobs);

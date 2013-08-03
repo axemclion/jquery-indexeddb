@@ -1,11 +1,23 @@
+--- 
+notifications: 
+  email: false
+after_failure: 
+- ./travis.sh revert
+env: 
+  global: 
+  - secure: |-
+      df2x3+OG30XluETYS3EM0bsZna6k4uu099FMzfnod7noFB5gBoIz4ygYyXR6
+      NQS2iSwslZWsYIupEnDBH9cMqqRHlASExon8RxLGRYiChTLSsRSMlcd8SDMD
+      ngGwSTq8hqtzCb0A0K6A93RppussTmoR1aRMUnBoxSeXwD0o4no=
+  - secure: |-
+      IBhbudcrXXb546jV6ANg2BLFdhM5sv/klEgdmRbH/kq44h4UcBZ6e07/GCoI
+      RjiNBn8lavPVvC6l8wOpidbWbvg2n99Lhe0hdL0hZjVPj2afjHNBcOchnhJ5
+      FJdsP3PlXuJhQetAfRktPzXyL4z8zhIp/0k9ptk4Vk5nWbOCCXI=
+after_success: 
+- ./travis.sh merge
+node_js: 
+- 0.8
+before_script: 
+- ./travis.sh before
+- npm install -g grunt-cli
 language: node_js
-node_js:
-   - 0.8
-notifications:
-    email: false
-before_script:
-  - npm install -g grunt-cli
-env:
-    global:
-      - secure: "B7pAZwdmje6ZzZNF6KZzmG0YfWAcr+yMB0GE2Dv4PWQXqhbfCV9MtzHXGWjR\nlWfIl4+iUEABvtqm7YUKfG9XRx6qMF1WViDNToRXZWBn+ntDE70RnsN8SaIp\nV8qGPOR4lSf7a0d8kmnGTgJONc778LEqbHGL2csgJtMX3D70PlQ="
-      - secure: "Na8Ro6OJrTuxLJjnQuBPz1+Rfsub7cH7d5MyBUE08lfU0JQYhRwTK6gNV9Hq\nSrOm9vygY6EKExbp/1gBL+nS0PkJj6dKbTGPCbNlGXdWI78giF769UQNww+O\nujbppzUZfaWcxHw/tSQojB1QOJXnLfLInC9WCkO0P/YL00hFwZ4="

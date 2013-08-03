@@ -1,8 +1,8 @@
-'use strict';
 (function($, undefined) {
+	'use strict';
 	var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 	var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
-	var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
+	var IDBCursor = window.IDBCursor || window.webkitIDBCursor || {};
 	IDBCursor.PREV = IDBCursor.PREV || "prev";
 	IDBCursor.NEXT = IDBCursor.NEXT || "next";
 
