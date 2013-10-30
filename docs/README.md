@@ -44,6 +44,12 @@ var dbOpenPromise = $.indexedDB("database_name", {
 			var obj2 = transaction.createObjectStore(store2);
 			obj1.createIndex("index");
 		}
+	},
+	"onError" : function(error, event) {
+	    // (Additional) Function called whenever you receive an error on any Deferred
+	    // This function come in handy in the development phase, when you don't specify
+	    // all the "fail" handler, and still get a lot of trouble. You better specify a function
+	    // here when starting a new development.
 	}
 });
 ```

@@ -55,9 +55,18 @@
 			}
 
 
+            function getDeferred(fn) {
+                return $.Deferred(function(dfd) {
+                    if (config && typeof(config.onError) == "function") {
+                        dfd.fail(config.onError);
+                    }
+                    fn(dfd);
+                })
+            }
+
 			var wrap = {
 				"request": function(req, args) {
-					return $.Deferred(function(dfd) {
+					return getDeferred(function(dfd) {
 						try {
 							var idbRequest = typeof req === "function" ? req(args) : req;
 							idbRequest.onsuccess = function(e) {
@@ -187,7 +196,7 @@
 				},
 
 				"cursor": function(idbCursor, callback) {
-					return $.Deferred(function(dfd) {
+					return getDeferred(function(dfd) {
 						try {
 							console.log("Cursor request created", idbCursor);
 							var cursorReq = typeof idbCursor === "function" ? idbCursor() : idbCursor;
@@ -336,7 +345,7 @@
 				"deleteDatabase": function() {
 					// Kinda looks ugly coz DB is opened before it needs to be deleted. 
 					// Blame it on the API 
-					return $.Deferred(function(dfd) {
+					return getDeferred(function(dfd) {
 						dbPromise.then(function(db, e) {
 							db.close();
 							wrap.request(function() {
@@ -358,7 +367,7 @@
 				"transaction": function(storeNames, mode) {
 					!$.isArray(storeNames) && (storeNames = [storeNames]);
 					mode = getDefaultTransaction(mode);
-					return $.Deferred(function(dfd) {
+					return getDeferred(function(dfd) {
 						dbPromise.then(function(db, e) {
 							var idbTransaction;
 							try {
@@ -397,7 +406,7 @@
 						result = {};
 
 					function op(callback) {
-						return $.Deferred(function(dfd) {
+						return getDeferred(function(dfd) {
 							function onTransactionProgress(trans, callback) {
 								try {
 									console.log("Finally, returning the object store", trans);
