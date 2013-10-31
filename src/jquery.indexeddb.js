@@ -3,10 +3,10 @@
 	var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 	var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
 	var IDBCursor = window.IDBCursor || window.webkitIDBCursor || {};
-	if (!IDBCursor.PREV) {
+	if (typeof IDBCursor.PREV === "undefined") {
         IDBCursor.PREV = "prev";
     }
-	if (!IDBCursor.NEXT) {
+	if (typeof IDBCursor.NEXT === "undefined") {
         IDBCursor.NEXT = "next";
     }
 
