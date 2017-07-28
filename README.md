@@ -19,14 +19,14 @@ Code
 ----
 The code written with the jQuery plugin is pretty simple. It looks something like 
 
-```
+```javascript
     $.indexeddb("BookShop-1").objectStore("BookList").openCursor().each(write); 
 ```
 
 
 A typical operation using the IndexedDB API would involve using the request model, creating transactions, checking for existence of object store using error responses and exceptions and then finally getting to the part where the data is actually iterated over.  
 
-```
+```javascript
     var request = window.indexedDB.open("BookShop-1");
     request.onsuccess = function(event){
         var db = request.result;
@@ -44,7 +44,7 @@ A typical operation using the IndexedDB API would involve using the request mode
 
 ```
 
-Read more about the API syntax in the (documentation)[https://github.com/axemclion/jquery-indexeddb/blob/master/docs/README.md]. 
+Read more about the API syntax in the [documentation](https://github.com/axemclion/jquery-indexeddb/blob/master/docs/README.md). 
 
 
 Building
