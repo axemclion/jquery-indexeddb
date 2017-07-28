@@ -3,18 +3,18 @@ Jquery-IndexedDB API Reference
 
 List of APIs - Quick Reference
 
-* [$.indexedDB()] (#openDatabase)
-* [$.indexedDB(, schema)] (#openDatabaseUpgrade)
-* [$.indexedDB().transaction()] (#transactionSec)
-* [$.indexedDB().objectStore()] (#objectStore)
-* [$.indexedDB().objectStore().add()] (#crud)
-* [$.indexedDB().objectStore().each()] (#cursorEach)
-* [$.indexedDB().objectStore().index()] (#index)
-* [$.indexedDB().objectStore().deleteDatabase()] (#deleteDatabase) 
+* [$.indexedDB()](#openDatabase)
+* [$.indexedDB(, schema)](#openDatabaseUpgrade)
+* [$.indexedDB().transaction()](#transactionSec)
+* [$.indexedDB().objectStore()](#objectStore)
+* [$.indexedDB().objectStore().add()](#crud)
+* [$.indexedDB().objectStore().each()](#cursorEach)
+* [$.indexedDB().objectStore().index()](#index)
+* [$.indexedDB().objectStore().deleteDatabase()](#deleteDatabase) 
 
 IndexedDB - Quick Intro
 -------------------------
-* [IndexedDB] (http://www.w3.org/TR/IndexedDB/) is a database inside a browser to save and retrieve objects on the browser/client.
+* [IndexedDB](http://www.w3.org/TR/IndexedDB/) is a database inside a browser to save and retrieve objects on the browser/client.
 * IndexedDB contains multiple `objectStores` (sort of tables) that contain data. 
 	*  `objectStores` have data records in form of (key, javascript object) pairs. (key) uniquely identify records
 	* Data can be written to, read from, or iterated over, inside and `object store`
@@ -49,18 +49,19 @@ var dbOpenPromise = $.indexedDB("database_name", {
 ```
 
 <a name = "openDatabaseUpgrade"/>
+
 When a `schema` parameter is specified, and if the DB is originally at version `1`, then only functions labeled `2` and above are executed. 
 This provides a way to migrate database by creating object stores, indexes or even reading/writing data between database versions. 
-For details on the `transaction` parameter, looks at the [Transaction] (#trans) object returned during a transaction. 
+For details on the `transaction` parameter, looks at the [Transaction](#trans) object returned during a transaction. 
 
 Note that the `createObjectStore`
 and the `deleteObjectStore` are available only during the upgrade operations. 
-Also, `objectStores` opened during progress can have `index` operations. See the [indexes] (#index) section for more details
+Also, `objectStores` opened during progress can have `index` operations. See the [indexes](#index) section for more details
 
 If the optional parameter is not specified, it simply opens the database to the latest version available.  
 
-It returns a [Jquery Promise] ("http://api.jquery.com/category/deferred-object/") with the following 
-[done] (#dbOpenDone), [progress] (#dbOpenProgress) and [fail] (#dbOpenFail) event handlers. 
+It returns a [Jquery Promise]("http://api.jquery.com/category/deferred-object/") with the following 
+[done](#dbOpenDone), [progress](#dbOpenProgress) and [fail](#dbOpenFail) event handlers. 
 
 ### Handling Database open success <a name = "dbOpenDone"/>
 
@@ -102,12 +103,15 @@ Transactions  <a name = "transactionSec"/>
 --------------------------
 Once a database is opened, read and write transactions can be performed within a transaction.
 
-	var transactionPromise = $.indexedDB("dbName").transaction(storeNames, mode);
+```javascript
+var transactionPromise = $.indexedDB("dbName").transaction(storeNames, mode);
+```
 
 `storeNames` is an array of object store names (or a single string object store name) that should be under this transaction. 
 
 <a name = "transactionMode"/> 
-`mode` is 0 or 1 indication *READ_ONLY* or *READ_WRITE*, similar to [modes] (http://www.w3.org/TR/IndexedDB/#dfn-mode) in the IndexedDB Specification.  
+
+`mode` is 0 or 1 indication *READ_ONLY* or *READ_WRITE*, similar to [modes](http://www.w3.org/TR/IndexedDB/#dfn-mode) in the IndexedDB Specification.  
 
 The returned transaction promise has the following event handlers during the lifetime of the transaction.  
 
@@ -126,7 +130,7 @@ transactionPromise.progress(function(trans){
 var objectStore = trans.objectStore("objectStoreName");
 ```
 
-The following 2 methods are available only when the database is being upgraded. Look at the [Open Database Schema] (#openDatabaseUpgrade) section for details. 
+The following 2 methods are available only when the database is being upgraded. Look at the [Open Database Schema](#openDatabaseUpgrade) section for details. 
 
 ``` javascript
 var objectStore = trans.createObjectStore("objectStoreName", {
@@ -137,7 +141,7 @@ var objectStore = trans.createObjectStore("objectStoreName", {
 
 trans.deleteObjectStore(objectStoreName); 
 ```
-See [object stores] (#objectStore) for methods on the `objectStore` returned by the above calls.
+See [object stores](#objectStore) for methods on the `objectStore` returned by the above calls.
 
 ### Transaction complete
 
@@ -160,7 +164,7 @@ transactionPromise.fail(function(event){
 Object Stores <a name = "objectStore"/>
 ----------------------------------------
 Once the database is opened, operations need to be performed on object stores. 
-An object store can be opened inside a [transaction that is in progress] (#transInProgress) or using a shorthand on the `$.indexedDB` object like. 
+An object store can be opened inside a [transaction that is in progress](#transInProgress) or using a shorthand on the `$.indexedDB` object like. 
 
 ``` javascript
 var objectStore = $.indexedDB("database_name").objectStore("objectStoreName", /* Optional */ mode );
@@ -171,7 +175,8 @@ The `mode` parameter defaults to READ_WRITE and is similar to the `mode` paramet
 As a convenience method, if the `mode` is set to `true` (instead of 0 or 1), an object store is created if it does not exist. Internally, the database is closed and opened with a higher version to trigger the version transaction where the object store can be created.  
 
 <a name = "crud"/>
-The above expression internally creates a transaction for this object store. The `mode` parameter is optional and similar to the [mode parameter] (#transactionMode) in transactions. 
+
+The above expression internally creates a transaction for this object store. The `mode` parameter is optional and similar to the [mode parameter](#transactionMode) in transactions. 
 The CRUD methods on the object store are 
 
 ```javascript
@@ -231,7 +236,7 @@ iterationPromise.fail(function(error, event){
 `range` limits the results and can be an array like `[lower, upper, lowerOpen, upperOpen]`.
 If only one element is specified in the array, it becomes an equals clause. The parameters `lowerOpen` and `upperOpen` are optional. If no value is specified for either upper or for lower bounds, they are included. These arguments behave as described in the [specification](http://www.w3.org/TR/IndexedDB/#widl-IDBKeyRange-lowerOpen)
 
-In addition to the above CURD operation, `objectStore.index` methods also allow operations using indexes. See [indexes] (#index) for details. 
+In addition to the above CURD operation, `objectStore.index` methods also allow operations using indexes. See [indexes](#index) for details. 
 
 Indexes <a name = "index"/>
 ---------------------------
@@ -251,7 +256,7 @@ the index object can be used.
 	});
 ```
 
-While upgrading a database in the [version change transaction] (openDatabaseUpgrade), indexes can also be created or deleted on an object store. 
+While upgrading a database in the [version change transaction](openDatabaseUpgrade), indexes can also be created or deleted on an object store. 
 
 ```javascript
 	// trans is created when a database upgrade is in progress
@@ -300,6 +305,6 @@ Links
 -------
 Some useful links
 
-* [IndexedDB W3C Specification] (http://www.w3.org/TR/IndexedDB/)
-* [IndexedDB API playground and examples] (http://nparashuram.com/IndexedDB)
-* [My work on IndexedDB] (http://blog.nparashuram.com/search/label/indexeddb)
+* [IndexedDB W3C Specification](http://www.w3.org/TR/IndexedDB/)
+* [IndexedDB API playground and examples](http://nparashuram.com/IndexedDB)
+* [My work on IndexedDB](http://blog.nparashuram.com/search/label/indexeddb)
