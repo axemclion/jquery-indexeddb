@@ -1,4 +1,4 @@
-(function($, undefined) {
+(window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB) && (function($, undefined) {
 	'use strict';
 	var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 	var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
@@ -61,28 +61,28 @@
 						try {
 							var idbRequest = typeof req === "function" ? req(args) : req;
 							idbRequest.onsuccess = function(e) {
-								
+
 								dfd.resolveWith(idbRequest, [idbRequest.result, e]);
 							};
 							idbRequest.onerror = function(e) {
-								
+
 								dfd.rejectWith(idbRequest, [idbRequest.error, e]);
 							};
 							if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
 								idbRequest.onblocked = function(e) {
-									
+
 									var res;
 									try {
 										res = idbRequest.result;
 									} catch (e) {
-										res = null; // Required for Older Chrome versions, accessing result causes error 
+										res = null; // Required for Older Chrome versions, accessing result causes error
 									}
 									dfd.notifyWith(idbRequest, [res, e]);
 								};
 							}
 							if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
 								idbRequest.onupgradeneeded = function(e) {
-									
+
 									dfd.notifyWith(idbRequest, [idbRequest.result, e]);
 								};
 							}
@@ -189,16 +189,16 @@
 				"cursor": function(idbCursor, callback) {
 					return $.Deferred(function(dfd) {
 						try {
-							
+
 							var cursorReq = typeof idbCursor === "function" ? idbCursor() : idbCursor;
 							cursorReq.onsuccess = function(e) {
-								
+
 								if (!cursorReq.result) {
 									dfd.resolveWith(cursorReq, [null, e]);
 									return;
 								}
 								var elem = {
-									// Delete, update do not move 
+									// Delete, update do not move
 									"delete": function() {
 										return wrap.request(function() {
 											return cursorReq.result["delete"]();
@@ -215,10 +215,10 @@
 									"key": cursorReq.result.key,
 									"value": cursorReq.result.value
 								};
-								
+
 								dfd.notifyWith(cursorReq, [elem, e]);
 								var result = callback.apply(cursorReq, [elem]);
-								
+
 								try {
 									if (result === false) {
 										dfd.resolveWith(cursorReq, [null, e]);
@@ -229,16 +229,16 @@
 										else cursorReq.result["continue"]();
 									}
 								} catch (e) {
-									
+
 									dfd.rejectWith(cursorReq, [cursorReq.result, e]);
 								}
 							};
 							cursorReq.onerror = function(e) {
-								
+
 								dfd.rejectWith(cursorReq, [cursorReq.result, e]);
 							};
 						} catch (e) {
-							
+
 							e.type = "exception";
 							dfd.rejectWith(cursorReq, [null, e]);
 						}
@@ -251,7 +251,7 @@
 					} catch (e) {
 						idbIndex = null;
 					}
-					
+
 					return {
 						"each": function(callback, range, direction) {
 							return wrap.cursor(function() {
@@ -300,11 +300,11 @@
 
 			// Start with opening the database
 			var dbPromise = wrap.request(function() {
-				
+
 				return version ? indexedDB.open(dbName, parseInt(version)) : indexedDB.open(dbName);
 			});
 			dbPromise.then(function(db, e) {
-				
+
 				db.onversionchange = function() {
 					// Try to automatically close the database if there is a version change request
 					if (!(config && config.onversionchange && config.onversionchange() !== false)) {
@@ -312,13 +312,13 @@
 					}
 				};
 			}, function(error, e) {
-				
+
 				// Nothing much to do if an error occurs
 			}, function(db, e) {
 				if (e && e.type === "upgradeneeded") {
 					if (config && config.schema) {
-						// Assuming that version is always an integer 
-						
+						// Assuming that version is always an integer
+
 						for (var i = e.oldVersion + 1; i <= e.newVersion; i++) {
 							typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
 						}
@@ -334,8 +334,8 @@
 					return indexedDB.cmp(key1, key2);
 				},
 				"deleteDatabase": function() {
-					// Kinda looks ugly coz DB is opened before it needs to be deleted. 
-					// Blame it on the API 
+					// Kinda looks ugly coz DB is opened before it needs to be deleted.
+					// Blame it on the API
 					return $.Deferred(function(dfd) {
 						dbPromise.then(function(db, e) {
 							db.close();
@@ -362,9 +362,9 @@
 						dbPromise.then(function(db, e) {
 							var idbTransaction;
 							try {
-								
+
 								idbTransaction = db.transaction(storeNames, mode);
-								
+
 								idbTransaction.onabort = idbTransaction.onerror = function(e) {
 									dfd.rejectWith(idbTransaction, [e]);
 								};
@@ -372,7 +372,7 @@
 									dfd.resolveWith(idbTransaction, [e]);
 								};
 							} catch (e) {
-								
+
 								e.type = "exception";
 								dfd.rejectWith(this, [e]);
 								return;
@@ -386,7 +386,7 @@
 						}, function(err, e) {
 							dfd.rejectWith(this, [e, err]);
 						}, function(res, e) {
-							
+
 							//dfd.notifyWith(this, ["", e]);
 						});
 
@@ -400,33 +400,33 @@
 						return $.Deferred(function(dfd) {
 							function onTransactionProgress(trans, callback) {
 								try {
-									
+
 									callback(trans.objectStore(storeName)).then(function(result, e) {
 										dfd.resolveWith(this, [result, e]);
 									}, function(err, e) {
 										dfd.rejectWith(this, [err, e]);
 									});
 								} catch (e) {
-									
+
 									e.name = "exception";
 									dfd.rejectWith(trans, [e, e]);
 								}
 							}
 							me.transaction(storeName, getDefaultTransaction(mode)).then(function() {
-								
+
 								// Nothing to do when transaction is complete
 							}, function(err, e) {
 								// If transaction fails, CrudOp fails
 								if (err.code === err.NOT_FOUND_ERR && (mode === true || typeof mode === "object")) {
-									
+
 									var db = this.result;
 									db.close();
 									dbPromise = wrap.request(function() {
-										
+
 										return indexedDB.open(dbName, (parseInt(db.version, 10) || 1) + 1);
 									});
 									dbPromise.then(function(db, e) {
-										
+
 										db.onversionchange = function() {
 											// Try to automatically close the database if there is a version change request
 											if (!(config && config.onversionchange && config.onversionchange() !== false)) {
@@ -434,12 +434,12 @@
 											}
 										};
 										me.transaction(storeName, getDefaultTransaction(mode)).then(function() {
-											
+
 											// Nothing much to do
 										}, function(err, e) {
 											dfd.rejectWith(this, [err, e]);
 										}, function(trans, e) {
-											
+
 											onTransactionProgress(trans, callback);
 										});
 									}, function(err, e) {
@@ -447,13 +447,13 @@
 									}, function(db, e) {
 										if (e.type === "upgradeneeded") {
 											try {
-												
+
 												db.createObjectStore(storeName, mode === true ? {
 													"autoIncrement": true
 												} : mode);
-												
+
 											} catch (ex) {
-												
+
 												dfd.rejectWith(this, [ex, e]);
 											}
 										}
@@ -462,7 +462,7 @@
 									dfd.rejectWith(this, [err, e]);
 								}
 							}, function(trans) {
-								
+
 								onTransactionProgress(trans, callback);
 							});
 						});
