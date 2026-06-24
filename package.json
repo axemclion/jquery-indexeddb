@@ -6,7 +6,7 @@
   "description": "A Jquery plugin for the IndexedDB API",
   "scripts": {
     "start": "grunt",
-    "test": "grunt test"
+    "test": "playwright test"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "database",
     "jquery"],
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "grunt": "~0.4.0",
     "grunt-saucelabs": "~4.0.0",
     "request": "~2.14.0",
