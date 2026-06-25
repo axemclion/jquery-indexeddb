@@ -19,7 +19,8 @@
   "keywords": [
     "indexedDB",
     "database",
-    "jquery"],
+    "jquery"
+  ],
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "grunt": "~0.4.0",
@@ -32,7 +33,8 @@
     "grunt-contrib-concat": "~0.1.3",
     "grunt-contrib-copy": "~0.4.0",
     "grunt-groundskeeper": "~0.1.3",
-    "grunt-contrib-clean": "~0.4.0"
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-cli": "^1.5.0"
   },
   "bundleDependencies": [],
   "license": "MIT",
