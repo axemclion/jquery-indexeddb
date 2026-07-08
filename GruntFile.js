@@ -43,18 +43,6 @@ module.exports = function(grunt) {
 			}
 		},
 
-		groundskeeper: {
-			main: {
-				files: {
-					'dist/jquery.indexeddb.js': ['src/jquery.indexeddb.js']
-				},
-				options: {
-					'console': false,
-					'debugger': false
-				}
-			}
-		},
-
 		uglify: {
 			options: {
 				report: 'gzip',
@@ -62,6 +50,21 @@ module.exports = function(grunt) {
 				sourceMap: 'dist/<%= (pkg.name).replace(/-/g, ".") %>.min.map',
 				sourceMapRoot: 'http://nparashuram.com/jquery-indexeddb/',
 				sourceMappingURL: 'http://nparashuram.com/jquery-indexeddb/dist/<%=pkg.name%>.min.map'
+			},
+			// Replaces the old grunt-groundskeeper step (abandoned since 2014,
+			// pinned to grunt ~0.4.0): strip console/debugger statements only,
+			// keep the rest readable, since dist/jquery.indexeddb.js (unminified)
+			// is loaded directly by the tests and demos.
+			unminified: {
+				options: {
+					compress: { drop_console: true, drop_debugger: true },
+					mangle: false,
+					sourceMap: false,
+					beautify: true
+				},
+				files: {
+					'dist/jquery.indexeddb.js': ['src/jquery.indexeddb.js']
+				}
 			},
 			main: {
 				files: {
@@ -92,7 +95,7 @@ module.exports = function(grunt) {
 		testJobs.push("saucelabs-qunit");
 	}
 
-	grunt.registerTask('build', ['jshint', 'groundskeeper', 'uglify']);
+	grunt.registerTask('build', ['jshint', 'uglify:unminified', 'uglify:main']);
 	grunt.registerTask('test', testJobs);
 	grunt.registerTask('default', 'build');
 	grunt.registerTask('dev', ['build', 'connect', 'watch']);
