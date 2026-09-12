@@ -279,9 +279,9 @@
 								return idbIndex.openCursor(wrap.range(key));
 							}
 						},
-						"count": function() {
+						"count": function(range) {
 							if (typeof idbIndex.count === "function") {
-								return wrap.request(idbIndex.count());
+								return wrap.request(idbIndex.count(wrap.range(range)));
 							} else {
 								throw "Count not implemented for cursors";
 							}
@@ -501,8 +501,8 @@
 							"get": function(key) {
 								return indexOp("get", indexName, [key]);
 							},
-							"count": function() {
-								return indexOp("count", indexName, []);
+							"count": function(range) {
+								return indexOp("count", indexName, [range]);
 							},
 							"getKey": function(key) {
 								return indexOp("getKey", indexName, [key]);
