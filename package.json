@@ -22,7 +22,7 @@
     "jquery"
   ],
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
+    "@playwright/test": "^1.64.1",
     "grunt": "~1.6.3",
     "grunt-saucelabs": "~9.0.1",
     "request": "~2.88.2",
